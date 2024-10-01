@@ -1,28 +1,33 @@
 import React from "react";
-import { View, Text, StyleSheet, Button } from "react-native";
-import { COLORS, SIZES } from "../../styles";
+import { TouchableOpacity, Text, StyleSheet } from "react-native";
+import { COLORS } from "../../styles"; // Pastikan path ini benar
 
-export default function ButtonApp({navigation, navigasi, title, color, }) {
-    console.log(navigasi)
+export default function ButtonApp({
+  navigation,
+  navigasi,
+  title,
+  color,
+  style,
+}) {
   return (
-      <Button
-        onPress={()=>{navigation.navigate({navigasi})}}
-        title={title}
-        color={color}
-        accessibilityLabel="Learn more about this purple button"
-      />
+    <TouchableOpacity
+      style={[styles.button, style]} // Terapkan gaya tambahan
+      onPress={() => navigation.navigate(navigasi)}
+    >
+      <Text style={styles.buttonText}>{title}</Text>
+    </TouchableOpacity>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
+  button: {
     backgroundColor: COLORS.primary,
-    justifyContent: "center",
+    padding: 10,
+    borderRadius: 5,
     alignItems: "center",
   },
-  title: {
-    fontSize: SIZES.largeText,
-    color: COLORS.white,
+  buttonText: {
+    color: "#FFF",
+    fontSize: 16,
   },
 });
