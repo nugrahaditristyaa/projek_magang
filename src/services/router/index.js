@@ -6,7 +6,6 @@ import Login_page from "../../pages/login_page";
 import Profile from "../../pages/profile";
 import Edit from "../../pages/edit";
 import Form from "../../pages/form";
-import Form2 from "../../pages/form2";
 import Dashboard from "../../pages/dashboard";
 import Detail_pelayanan from "../../pages/detail_pelayanan";
 import Detail_disabilitas from "../../pages/detail_disabilitas";
@@ -25,6 +24,7 @@ function MainTabs() {
       }}
     >
       <Tab.Screen name="Home" component={Home} />
+      <Tab.Screen name="Dashboard" component={Dashboard} />
       <Tab.Screen name="Profile" component={Profile} />
       <Tab.Screen name="Edit" component={Edit} />
       {/* Tambahkan layar/tab lain sesuai kebutuhan */}
@@ -48,7 +48,6 @@ export default function Router() {
         <Stack.Screen name="Home" component={Home} />
         <Stack.Screen name="Edit" component={Edit} />
         <Stack.Screen name="Form" component={Form} />
-        <Stack.Screen name="Form2" component={Form2} />
         <Stack.Screen name="Dashboard" component={Dashboard} />
         <Stack.Screen name="Detail_pelayanan" component={Detail_pelayanan} />
         <Stack.Screen name="Detail_pekerjaan" component={Detail_pekerjaan} />

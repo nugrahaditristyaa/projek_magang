@@ -45,4 +45,15 @@ export default {
       console.error("[API] getSebaranJemaat error", error);
     }
   },
+  async getUlangTahunJemaat() {
+    try {
+      const response = await axios.get(
+        "https://apigkjdayu-1fsn3awq.b4a.run/jemaat/ulangTahun"
+      );
+      console.log("[API] getUlangTahunJemaat", response.data["data"]);
+      return response.data["data"];
+    } catch (error) {
+      console.error("[API] getUlangTahunJemaat error", error);
+    }
+  },
 };
