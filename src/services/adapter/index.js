@@ -67,4 +67,27 @@ export default {
       throw error;
     }
   },
+
+  async tambahDataMajelis(data) {
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/tambahDataMajelis`,
+        data,
+        {
+          headers: {
+            "Content-Type": "application/json", // Format body JSON
+          },
+        }
+      );
+
+      console.log("[MajelisAdapter] Response:", response.data);
+      return response.data; // Mengembalikan respons dari server
+    } catch (error) {
+      console.error(
+        "[MajelisAdapter] Error:",
+        error.response?.data || error.message
+      );
+      throw error; // Lempar error agar bisa di-handle di komponen
+    }
+  },
 };
