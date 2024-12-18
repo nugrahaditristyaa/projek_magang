@@ -133,13 +133,13 @@ export default function Home({ navigation }) {
         <TouchableOpacity onPress={() => navigation.navigate("Home")}>
           <Icon name="home" size={30} color="#4A90E2" />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate("Dashboard")}>
+        <TouchableOpacity onPress={() => console.log("Statistics pressed")}>
           <Icon name="chart-bar" size={30} color="#4A90E2" />
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate("Edit")}>
           <Icon name="note" size={30} color="#4A90E2" />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => console.log("User pressed")}>
+        <TouchableOpacity onPress={() => navigation.navigate("Profile")}>
           <Icon name="account" size={30} color="#4A90E2" />
         </TouchableOpacity>
       </View>
