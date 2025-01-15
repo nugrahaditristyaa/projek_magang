@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, ScrollView, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity } from 'react-native';
+import { Table, TableWrapper, Row, Cell } from 'react-native-table-component';
+import { Picker } from '@react-native-picker/picker'; // Import Picker
 import adapter from "../../services/adapter";
 
 // Fungsi untuk mengonversi nama bulan menjadi angka
@@ -13,7 +15,7 @@ const getMonthNumber = (monthName) => {
 
 export default function DaftarUlangTahun({ navigation }) {
   const [data, setData] = useState([]); // State untuk menyimpan data ulang tahun
-  const [searchValue, setSearchValue] = useState('');  // State untuk menyimpan nilai pencarian
+  const [selectedMonth, setSelectedMonth] = useState('');  // State untuk bulan yang dipilih
   const [currentPage, setCurrentPage] = useState(1);  // Halaman saat ini
   const [pageSize, setPageSize] = useState(10);       // Jumlah data per halaman
 
@@ -50,26 +52,14 @@ export default function DaftarUlangTahun({ navigation }) {
     getAPI();
   }, []);
 
-  // Filter data berdasarkan pencarian
+  // Filter data berdasarkan bulan yang dipilih
   const filteredData = data.filter((item) => {
-    if (!searchValue) return true;
+    if (!selectedMonth) return true; // Tidak ada filter bulan, tampilkan semua data
 
-    const searchLower = searchValue.toLowerCase();
     const birthDate = item.tglLahir; // item.tglLahir sudah berupa objek Date
-
     const itemMonth = birthDate.getMonth() + 1; // Bulan (0-based, tambah 1)
-    const itemYear = birthDate.getFullYear();   // Tahun
 
-    // Konversi searchValue menjadi angka atau bulan (jika teks)
-    const searchMonthAsNumber = isNaN(searchValue)
-      ? getMonthNumber(searchLower) // Jika teks, cari nomor bulan
-      : Number(searchValue);
-
-    return (
-      item.nama.toLowerCase().includes(searchLower) || // Cari nama
-      itemYear === Number(searchValue) ||             // Cari tahun
-      itemMonth === searchMonthAsNumber               // Cari bulan
-    );
+    return itemMonth === selectedMonth; // Hanya tampilkan data dengan bulan yang sama
   });
 
   // Fungsi untuk mengubah halaman
@@ -81,83 +71,100 @@ export default function DaftarUlangTahun({ navigation }) {
   const startIndex = (currentPage - 1) * pageSize;
   const paginatedData = filteredData.slice(startIndex, startIndex + pageSize);
 
-  const renderItem = ({ item }) => (
-    <View style={styles.tableRow}>
-      <Text style={styles.tableCell}>{item.id}</Text>
-      <Text style={styles.tableCell}>{item.kode}</Text>
-      <Text style={styles.tableCell}>{item.nama}</Text>
-      <Text style={styles.tableCell}>
-        {item.tglLahir instanceof Date && !isNaN(item.tglLahir.getTime()) // Periksa apakah tglLahir valid
-          ? item.tglLahir.toLocaleDateString('id-ID', {
-              day: 'numeric',
-              month: 'short',
-              year: 'numeric',
-            })
-          : 'Tanggal tidak valid'}
-      </Text>
-      <Text style={styles.tableCell}>{item.umur}</Text>
-    </View>
-  );
+  const renderRow = (item) => [
+    item.id,
+    item.kode,
+    item.nama,
+    item.tglLahir instanceof Date && !isNaN(item.tglLahir.getTime())
+      ? item.tglLahir.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
+      : 'Tanggal tidak valid',
+    item.umur,
+  ];
 
   // Menghitung jumlah halaman
   const totalPages = Math.ceil(filteredData.length / pageSize);
+
+  // Array width for each column
+  const widthArr = [80, 100, 300, 110, 50]; // Width for each column (adjust as necessary)
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>DATA ULANG TAHUN WARGA GKJ DAYU</Text>
 
       <ScrollView style={styles.content}>
-        {/* Search Input */}
+        {/* Month Picker */}
         <View style={styles.searchContainer}>
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Cari nama, MM, atau YYYY"
-            value={searchValue}
-            onChangeText={setSearchValue}
-          />
+          <Picker
+            selectedValue={selectedMonth}
+            onValueChange={(itemValue) => setSelectedMonth(itemValue)}
+            style={styles.picker}
+          >
+            <Picker.Item label="Pilih Bulan" value="" />
+            <Picker.Item label="Januari" value={1} />
+            <Picker.Item label="Februari" value={2} />
+            <Picker.Item label="Maret" value={3} />
+            <Picker.Item label="April" value={4} />
+            <Picker.Item label="Mei" value={5} />
+            <Picker.Item label="Juni" value={6} />
+            <Picker.Item label="Juli" value={7} />
+            <Picker.Item label="Agustus" value={8} />
+            <Picker.Item label="September" value={9} />
+            <Picker.Item label="Oktober" value={10} />
+            <Picker.Item label="November" value={11} />
+            <Picker.Item label="Desember" value={12} />
+          </Picker>
         </View>
 
         <View style={styles.table}>
-          {/* Header */}
-          <View style={[styles.tableRow, styles.tableHeader]}>
-            <Text style={styles.tableCell}>No Induk Jemaat</Text>
-            <Text style={styles.tableCell}>Kode Wilayah</Text>
-            <Text style={styles.tableCell}>Nama</Text>
-            <Text style={styles.tableCell}>Tanggal Lahir</Text>
-            <Text style={styles.tableCell}>Umur</Text>
-          </View>
+          {/* Table Header */}
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <Table borderStyle={{ borderWidth: 1, borderColor: '#ddd' }}>
+              <Row
+                data={['No Induk Jemaat', 'Kode Wilayah', 'Nama', 'Tanggal Lahir', 'Umur']}
+                style={styles.tableHeader}
+                textStyle={styles.tableHeaderText}
+                widthArr={widthArr} // Set width for each column
+              />
+              {/* Table Content */}
+              {paginatedData.length > 0 ? (
+                paginatedData.map((item, index) => (
+                  <TableWrapper key={index} style={styles.tableRow}>
+                    {renderRow(item).map((cellData, index) => (
+                      <Cell
+                        key={index}
+                        data={cellData}
+                        textStyle={styles.tableCell}
+                        width={widthArr[index]} // Apply column width
+                      />
+                    ))}
+                  </TableWrapper>
+                ))
+              ) : (
+                <Text style={styles.noData}>Tidak ada data yang ditemukan.</Text>
+              )}
+            </Table>
+          </ScrollView>
 
-          {/* Content */}
-          {paginatedData.length > 0 ? (
-            <FlatList
-              data={paginatedData}  // Menampilkan data yang sudah difilter berdasarkan pencarian dan di-paginasi
-              renderItem={renderItem}
-              keyExtractor={(item, index) => index.toString()}
-              ListFooterComponent={
-                <View style={styles.pagination}>
-                  <TouchableOpacity
-                    style={[styles.pageButton, currentPage === 1 && styles.disabledButton]}
-                    onPress={() => currentPage > 1 && paginate(currentPage - 1)}
-                    disabled={currentPage === 1}
-                  >
-                    <Text style={styles.pageButtonText}>Previous</Text>
-                  </TouchableOpacity>
-                  <Text style={styles.pageInfo}>
-                    {currentPage} / {totalPages}
-                  </Text>
-                  <TouchableOpacity
-                    style={[styles.pageButton, currentPage === totalPages && styles.disabledButton]}
-                    onPress={() => currentPage < totalPages && paginate(currentPage + 1)}
-                    disabled={currentPage === totalPages}
-                  >
-                    <Text style={styles.pageButtonText}>Next</Text>
-                  </TouchableOpacity>
-                </View>
-              }
-            />
-          ) : (
-            <Text style={styles.noData}>Tidak ada data yang ditemukan.</Text>
-          )}
+          {/* Pagination */}
+          <View style={styles.pagination}>
+            <TouchableOpacity
+              style={[styles.pageButton, currentPage === 1 && styles.disabledButton]}
+              onPress={() => currentPage > 1 && paginate(currentPage - 1)}
+              disabled={currentPage === 1}
+            >
+              <Text style={styles.pageButtonText}>Previous</Text>
+            </TouchableOpacity>
+            <Text style={styles.pageInfo}>
+              {currentPage} / {totalPages}
+            </Text>
+            <TouchableOpacity
+              style={[styles.pageButton, currentPage === totalPages && styles.disabledButton]}
+              onPress={() => currentPage < totalPages && paginate(currentPage + 1)}
+              disabled={currentPage === totalPages}
+            >
+              <Text style={styles.pageButtonText}>Next</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </ScrollView>
     </View>
@@ -182,8 +189,10 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: 'row',
     marginBottom: 20,
+    backgroundColor: "white",
+    borderRadius: 8,
   },
-  searchInput: {
+  picker: {
     flex: 1,
     height: 40,
     borderWidth: 1,
@@ -200,9 +209,15 @@ const styles = StyleSheet.create({
   },
   tableHeader: {
     backgroundColor: '#95FBFB',
+    borderTopLeftRadius: 8, // Border radius for the top left corner
+    borderTopRightRadius: 8, // Border radius for the top right corner
+  },
+  tableHeaderText: {
+    textAlign: 'center',
+    fontWeight: 'bold',
+    padding: 6,
   },
   tableCell: {
-    flex: 1,
     padding: 6,
     textAlign: 'center',
     borderBottomWidth: 1,
@@ -233,6 +248,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   disabledButton: {
-    backgroundColor: '#ddd',
+    backgroundColor: '#ccc',
   },
 });

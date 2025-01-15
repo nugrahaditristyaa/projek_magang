@@ -1,14 +1,73 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, Dimensions, TouchableOpacity, Animated ,Image} from 'react-native';
-import { BarChart } from 'react-native-chart-kit';
+import React, { useState, useEffect } from "react";
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  Animated,
+  Image,
+} from "react-native";
+import { BarChart } from "react-native-gifted-charts";
 import ButtonDetail from "../ButtonNavigate";
-import Images from "../../assets/Images";
+import { Table, Row } from "react-native-table-component";
+import adapter from "../../services/adapter";
 
-export default function SebaranGender({navigation}){
+
+export default function SebaranGender({ navigation }) {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [animation, setAnimation] = useState(new Animated.Value(0)); // Start with height 0
+  const [animation, setAnimation] = useState(new Animated.Value(0));
+  const [tableData, setTableData] = useState([]);
+  const [grafikData, setGrafikData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedBar, setSelectedBar] = useState(null);
+
+  const validateData = (data) => {
+    if (!data || !Array.isArray(data)) return [];
+    return data.map((item, index) => ({
+      value: item.total || 0, // Nilai default 0 jika jumlah null
+      label: item.kode_wilayah || "Unknown", // Label default jika kondisi null
+      jenis_kelamin: item.jenis_kelamin || "Tidak Diketahui",
+      frontColor:
+        item.kode_wilayah && item.jenis_kelamin === "Laki-Laki"
+          ? "#0E3EDA"
+          : "#F473B9",
+      onPress: () => {
+        setSelectedBar({
+          index,
+          total: item.total || 0,
+          label: item.kode_wilayah || "Unknown",
+          jenis_kelamin: item.jenis_kelamin || "Tidak Diketahui",
+        });
+      },
+    }));
+  };
+
+  // Fetch data for table and chart
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const grafikDataResponse = await adapter.getSebaranGrafikGender();
+        setGrafikData(validateData(grafikDataResponse));
+        const formattedTableData = grafikDataResponse.map((item) => [
+          item.jenis_kelamin,
+        ]);
+        setTableData(formattedTableData);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+    if (selectedBar) {
+      console.log("Selected Bar Data:", selectedBar);
+      const timer = setTimeout(() => setSelectedBar(null), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [selectedBar]);
+
   const toggleDropdown = () => {
-    const toValue = isExpanded ? 0 : 1; // Determine final value based on expanded state
+    const toValue = isExpanded ? 0 : 1;
 
     Animated.timing(animation, {
       toValue,
@@ -19,77 +78,116 @@ export default function SebaranGender({navigation}){
     setIsExpanded(!isExpanded);
   };
 
-  // Interpolate the animation value to height
   const animatedHeight = animation.interpolate({
     inputRange: [0, 1],
-    outputRange: [0, 420], // Adjust the height values as needed
+    outputRange: [0, 420],
   });
+
+  const maxValue =
+    grafikData.length > 0
+      ? Math.max(...grafikData.map((item) => item.value), 75)
+      : 75;
 
   return (
     <View style={styles.card}>
       {/* Header as a toggle for the dropdown */}
-      <TouchableOpacity 
-        style={[styles.headerDropdown, isExpanded && styles.headerDropdownExpanded]} 
+      <TouchableOpacity
+        style={[
+          styles.headerDropdown,
+          isExpanded && styles.headerDropdownExpanded,
+        ]}
         onPress={toggleDropdown}
       >
         <Text style={styles.headerText}>SEBARAN GENDER</Text>
-        <Image style={styles.gambar} source={isExpanded ? require('../../assets/Images/panahatas.png') : require('../../assets/Images/panahbawah.png')}/>
+        <Image
+          style={styles.gambar}
+          source={
+            isExpanded
+              ? require("../../assets/Images/panahatas.png")
+              : require("../../assets/Images/panahbawah.png")
+          }
+        />
       </TouchableOpacity>
 
-      
       {/* Dropdown content */}
-      <Animated.View style={[styles.contentContainer, { height: animatedHeight }]}>
+      <Animated.View
+        style={[styles.contentContainer, { height: animatedHeight }]}
+      >
         <View style={styles.infoContainer}>
-        <View style={styles.separator} />
-        <View style={styles.infoItemwarga}>
-            <Text style={styles.wargaText}>Jumlah Warga</Text>
-          </View>
-          <View style={styles.infoItem}>
-            <View style={[styles.dot, { backgroundColor: '#63ACE1' }]} />
-            <Text style={styles.wilayahText}>Laki-Laki</Text>
-            <Text style={styles.number}>112</Text>
-          </View>
-          <View style={styles.infoItem}>
-            <View style={[styles.dot, { backgroundColor: '#720FA0' }]} />
-            <Text style={styles.wilayahText}>Perempuan</Text>
-            <Text style={styles.number}>140</Text>
-          </View>
-          <View style={[styles.infoItem, styles.totalItem]}>
-            <Text style={styles.totalText}>Total</Text>
-            <Text style={styles.number}>252</Text>
-          </View>
-        </View>
+          <View style={styles.separator} />
 
-        <BarChart
-          data={{
-            labels: ['Wilayah 1', 'Wilayah 3', 'Wilayah 4', 'Wilayah 5'],
-            datasets: [
-              {
-                data: [62, 37, 66, 87],
-              },
-            ],
-            colors: [
-              () => 'red',
-              () => 'green',
-              () => 'blue',
-              () => 'purple',
-            ],
-          }}
-          width={Dimensions.get('window').width - 40} // from react-native
-          height={220}
-          yAxisLabel=""
-          showValuesOnTopOfBars={false} // Menyembunyikan nilai di atas bar
-          fromZero // Mulai dari nol
-          chartConfig={{
-            backgroundColor: '#fff',
-            backgroundGradientFrom: '#fff',
-            backgroundGradientTo: '#fff',
-            decimalPlaces: 0,
-            color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-            labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-          }}
-          style={styles.chart}
-        />
+          {/* Table showing data */}
+          {loading ? (
+            <Text style={styles.loadingText}>Loading data...</Text>
+          ) : (
+            <Table >
+              {/* Header with circles next to labels */}
+              <Row
+                data={Array.from(
+                  new Set(grafikData.map((item) => item.jenis_kelamin))
+                ).map((jenis_kelamin) => (
+                  <View style={styles.headerCell} key={jenis_kelamin}>
+                    <View
+                      style={[
+                        styles.circle,
+                        {
+                          backgroundColor:
+                            jenis_kelamin === "Laki-Laki"
+                              ? "#0E3EDA"
+                              : "#F473B9",
+                        },
+                      ]}
+                    />
+                    <Text style={styles.tableHeaderText}>{jenis_kelamin}</Text>
+                  </View>
+                ))}
+                style={styles.tableHeader}
+              />
+            </Table>
+          )}
+
+          {/* Chart */}
+          {grafikData.length > 0 && (
+            <View style={{ position: "relative", marginTop: 30 }}>
+              <BarChart
+                data={grafikData}
+                barWidth={15}
+                spacing={24}
+                roundedTop
+                roundedBottom
+                xAxisThickness={0}
+                yAxisThickness={0}
+                yAxisTextStyle={{ color: "gray" }}
+                noOfSections={3}
+                maxValue={maxValue}
+              />
+              {selectedBar && (
+                <View
+                  style={{
+                    position: "absolute",
+                    top: -40, // Atur posisi vertikal relatif terhadap chart
+                    left: 24 + selectedBar.index * (8 + 24), // Kalkulasi posisi horizontal
+                    backgroundColor: "#fff",
+                    padding: 10,
+                    borderRadius: 8,
+                    elevation: 3,
+                  }}
+                >
+                  <Text style={{ fontWeight: "bold", color: "#000" }}>
+                    {selectedBar.jenis_kelamin}
+                  </Text>
+                  <Text style={{ fontWeight: "bold", color: "#000" }}>
+                    Wilayah: {selectedBar.label}
+                  </Text>
+                  <Text style={{ color: "gray" }}>
+                    Total: {selectedBar.total}
+                  </Text>
+                </View>
+              )}
+            </View>
+          )}
+          <Text style={styles.chartFooter}>Gender</Text>
+        </View>
 
         <ButtonDetail
           title="Lihat Detail"
@@ -100,94 +198,100 @@ export default function SebaranGender({navigation}){
       </Animated.View>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
+  // Tambahkan gaya untuk teks info
+
+  selectedInfo: {
+    textAlign: "center",
+    color: "#333",
+    fontSize: 16,
+    marginVertical: 10,
+    fontWeight: "bold",
+  },
   card: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     margin: 20,
     padding: 20,
     borderRadius: 30,
     elevation: 5,
   },
   headerDropdown: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   headerDropdownExpanded: {
     paddingBottom: 10,
   },
   headerText: {
-    fontSize: 18,
-    fontWeight: 'bold',
+    fontSize: 15,
+    fontWeight: "bold",
   },
   gambar: {
-    width: 20,  
+    width: 20,
     height: 20,
   },
   separator: {
     borderBottomWidth: 1,
-    borderBottomColor: '#D3D3D3',
+    borderBottomColor: "#D3D3D3",
     marginVertical: 10,
   },
   contentContainer: {
-    overflow: 'hidden',
+    overflow: "hidden",
+    marginLeft: 10,
   },
   infoContainer: {
     marginBottom: 10,
   },
-  infoItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  infoItemwarga: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-  },
-  dot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    marginLeft: 15,
-  },
-  wilayahText: {
-    flex: 1,
-    fontSize: 14,
-    marginLeft: 15,
-  },
-  wargaText: {
-    fontWeight: 'bold',
+  tableHeader: {
+    fontWeight: "bold",
     marginBottom: 5,
-    marginRight: 25,
+    justifyContent: "space-between",
+    flexDirection: "row",
   },
-  totalText: {
-    fontWeight: 'bold',
-    marginLeft: 40,
+  headerCell: {
+    flexDirection: "row",
+    alignItems: "center",
   },
-  number: {
-    marginRight: 25,
-    fontWeight: 'bold',
-    fontSize: 14,
+  circle: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    marginRight: 10,
+    marginLeft: 10,
   },
-  totalItem: {
-    marginTop: 5,
+  lakilakiCircle: {
+    backgroundColor: "#0E3EDA",
   },
-  chart: {
-    marginVertical: 8,
-    borderRadius: 20,
+  perempuanCircle: {
+    backgroundColor: "#F473B9",
+  },
+  tableHeaderText: {
+    textAlign: "center",
+    fontWeight: "bold",
+  },
+  loadingText: {
+    textAlign: "center",
+    fontStyle: "italic",
+    color: "gray",
   },
   detailButton: {
-    backgroundColor: '#4a90e2',
+    backgroundColor: "#4a90e2",
     padding: 15,
     borderRadius: 30,
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: 10,
   },
   buttonText: {
-    color: 'white',
-    fontWeight: 'bold',
+    color: "white",
+    fontWeight: "bold",
+  },
+  chartFooter: {
+    textAlign: "center",
+    marginTop: 10,
+    fontSize: 12,
+    color: "gray",
   },
 });

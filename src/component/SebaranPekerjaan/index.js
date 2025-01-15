@@ -1,14 +1,98 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, Dimensions, TouchableOpacity, Animated ,Image} from 'react-native';
-import { BarChart } from 'react-native-chart-kit';
+import React, { useState, useEffect } from "react";
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  Animated,
+  Image,
+} from "react-native";
+import { BarChart } from "react-native-gifted-charts";
+import { Table, Row } from "react-native-table-component";
+import adapter from "../../services/adapter";
 import ButtonDetail from "../ButtonNavigate";
-import Images from "../../assets/Images";
 
-export default function SebaranPekerjaan({navigation}){
+export default function SebaranPekerjaan({ navigation }) {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [animation, setAnimation] = useState(new Animated.Value(0)); // Start with height 0
+  const [animation, setAnimation] = useState(new Animated.Value(0));
+  const [tableData, setTableData] = useState([]);
+  const [grafikData, setGrafikData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedBar, setSelectedBar] = useState(null);
+
+  const validateData = (data) => {
+    if (!data || !Array.isArray(data)) return [];
+
+    // Group data by kode_wilayah
+    const groupedData = data.reduce((acc, item) => {
+      const key = item.kode_wilayah || "Unknown";
+      if (!acc[key]) acc[key] = [];
+      acc[key].push(item);
+      return acc;
+    }, {});
+
+    // For each wilayah, sort and take the top 4
+    const filteredData = Object.keys(groupedData).map((wilayah) => {
+      const sortedItems = groupedData[wilayah]
+        .sort((a, b) => b.total - a.total) // Sort by total in descending order
+        .slice(0, 4); // Take top 4
+
+      return sortedItems.map((item, index) => ({
+        value: item.total || 0,
+        label: item.kode_wilayah || "Unknown",
+        pekerjaan: item.pekerjaan || "Tidak Mengisi",
+        frontColor: "#8E44AD", // Default color, you can change if needed
+        onPress: () => {
+          setSelectedBar({
+            index,
+            total: item.total || 0,
+            label: item.kode_wilayah || "Unknown",
+            pekerjaan: item.pekerjaan || "Tidak Mengisi",
+          });
+        },
+      }));
+    });
+
+    // Flatten the grouped data to a single array
+    return filteredData.flat();
+  };
+
+  const calculateHeaderRows = (data, itemsPerRow = 3) => {
+    const uniqueItems = Array.from(new Set(data.map((item) => item.pekerjaan)));
+    return uniqueItems.reduce((acc, item, index) => {
+      if (index % itemsPerRow === 0) {
+        acc.push([item]);
+      } else {
+        acc[acc.length - 1].push(item);
+      }
+      return acc;
+    }, []);
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const grafikDataResponse = await adapter.getSebaranGrafikPekerjaan();
+        setGrafikData(validateData(grafikDataResponse));
+        const formattedTableData = grafikDataResponse.map((item) => [item.pekerjaan]);
+        setTableData(formattedTableData);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+
+    if (selectedBar) {
+      console.log("Selected Bar Data:", selectedBar);
+      const timer = setTimeout(() => setSelectedBar(null), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [selectedBar]);
+
   const toggleDropdown = () => {
-    const toValue = isExpanded ? 0 : 1; // Determine final value based on expanded state
+    const toValue = isExpanded ? 0 : 1;
 
     Animated.timing(animation, {
       toValue,
@@ -19,185 +103,165 @@ export default function SebaranPekerjaan({navigation}){
     setIsExpanded(!isExpanded);
   };
 
-  // Interpolate the animation value to height
   const animatedHeight = animation.interpolate({
     inputRange: [0, 1],
-    outputRange: [0, 455], // Adjust the height values as needed
+    outputRange: [0, 600],
   });
+
+  const maxValue =
+    grafikData.length > 0
+      ? Math.max(...grafikData.map((item) => item.value), 75)
+      : 75;
 
   return (
     <View style={styles.card}>
-      {/* Header as a toggle for the dropdown */}
-      <TouchableOpacity 
-        style={[styles.headerDropdown, isExpanded && styles.headerDropdownExpanded]} 
+      <TouchableOpacity
+        style={[styles.headerDropdown, isExpanded && styles.headerDropdownExpanded]}
         onPress={toggleDropdown}
       >
         <Text style={styles.headerText}>SEBARAN PEKERJAAN</Text>
-        <Image style={styles.gambar} source={isExpanded ? require('../../assets/Images/panahatas.png') : require('../../assets/Images/panahbawah.png')}/>
+        <Image
+          style={styles.gambar}
+          source={isExpanded ? require("../../assets/Images/panahatas.png") : require("../../assets/Images/panahbawah.png")}
+        />
       </TouchableOpacity>
 
-      
-      {/* Dropdown content */}
       <Animated.View style={[styles.contentContainer, { height: animatedHeight }]}>
         <View style={styles.infoContainer}>
-        <View style={styles.separator} />
-        <View style={styles.infoItemwarga}>
-            <Text style={styles.wargaText}>Jumlah Warga</Text>
-          </View>
-          <View style={styles.infoItem}>
-            <View style={[styles.dot, { backgroundColor: 'red' }]} />
-            <Text style={styles.wilayahText}>Wilayah 1</Text>
-            <Text style={styles.number}>62</Text>
-          </View>
-          <View style={styles.infoItem}>
-            <View style={[styles.dot, { backgroundColor: 'green' }]} />
-            <Text style={styles.wilayahText}>Wilayah 3</Text>
-            <Text style={styles.number}>37</Text>
-          </View>
-          <View style={styles.infoItem}>
-            <View style={[styles.dot, { backgroundColor: 'blue' }]} />
-            <Text style={styles.wilayahText}>Wilayah 4</Text>
-            <Text style={styles.number}>66</Text>
-          </View>
-          <View style={styles.infoItem}>
-            <View style={[styles.dot, { backgroundColor: 'purple' }]} />
-            <Text style={styles.wilayahText}>Wilayah 5</Text>
-            <Text style={styles.number}>87</Text>
-          </View>
-          <View style={[styles.infoItem, styles.totalItem]}>
-            <Text style={styles.totalText}>Total</Text>
-            <Text style={styles.number}>252</Text>
-          </View>
-        </View>
+          <View style={styles.separator} />
 
-        <BarChart
-          data={{
-            labels: ['Tidak Mengisi', 'Pegawai Swasta', 'Pensiun', 'Wiraswasta'],
-            datasets: [
-              {
-                data: [62, 37, 66, 87],
-              },
-            ],
-            colors: [
-              () => 'red',
-              () => 'green',
-              () => 'blue',
-              () => 'purple',
-            ],
-          }}
-          width={Dimensions.get('window').width - 40}
-          height={220}
-          yAxisLabel=""
-          showValuesOnTopOfBars={false}
-          fromZero
-          chartConfig={{
-            backgroundColor: '#fff',
-            backgroundGradientFrom: '#fff',
-            backgroundGradientTo: '#fff',
-            decimalPlaces: 0,
-            color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-            labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-          }}
-          style={styles.chart}
-        />
+          {loading ? (
+            <Text style={styles.loadingText}>Loading data...</Text>
+          ) : (
+            <View>
+              {calculateHeaderRows(grafikData).map((row, rowIndex) => (
+                <Row
+                  key={rowIndex}
+                  data={row.map((pekerjaan) => (
+                    <View style={styles.headerCell} key={pekerjaan}>
+                      <View style={[styles.circle, { backgroundColor: "#8E44AD" }]} />
+                      <Text style={styles.tableHeaderText}>{pekerjaan}</Text>
+                    </View>
+                  ))}
+                  style={[styles.tableHeader, { marginBottom: 10 }]}
+                />
+              ))}
+            </View>
+          )}
+
+          {grafikData.length > 0 && (
+            <View style={{ position: "relative", marginTop: 30, marginLeft: -6 }}>
+              <BarChart
+                data={grafikData}
+                barWidth={15}
+                spacing={12}
+                roundedTop
+                roundedBottom
+                xAxisThickness={0}
+                yAxisThickness={0}
+                yAxisTextStyle={{ color: "gray" }}
+                noOfSections={3}
+                maxValue={maxValue}
+              />
+              {selectedBar && (
+                <View
+                  style={{
+                    position: "absolute",
+                    top: -20,
+                    left: 24 + selectedBar.index * (8 + 24),
+                    backgroundColor: "#fff",
+                    padding: 10,
+                    borderRadius: 8,
+                    elevation: 3,
+                  }}
+                >
+                  <Text style={{ fontWeight: "bold", color: "#000" }}>{selectedBar.pekerjaan}</Text>
+                  <Text style={{ fontWeight: "bold", color: "#000" }}>Wilayah: {selectedBar.label}</Text>
+                  <Text style={{ color: "gray" }}>Total: {selectedBar.total}</Text>
+                </View>
+              )}
+            </View>
+          )}
+          <Text style={styles.chartFooter}>Pekerjaan</Text>
+        </View>
 
         <ButtonDetail
           title="Lihat Detail"
           navigation={navigation}
-          navigasi="Detail_pekerjaan"
+          navigasi="Detail_golongandarah"
           style={styles.detailButton}
         />
       </Animated.View>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     margin: 20,
     padding: 20,
     borderRadius: 30,
     elevation: 5,
   },
   headerDropdown: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   headerDropdownExpanded: {
     paddingBottom: 10,
   },
   headerText: {
-    fontSize: 18,
-    fontWeight: 'bold',
+    fontSize: 15,
+    fontWeight: "bold",
   },
   gambar: {
-    width: 20,  
+    width: 20,
     height: 20,
   },
   separator: {
     borderBottomWidth: 1,
-    borderBottomColor: '#D3D3D3',
+    borderBottomColor: "#D3D3D3",
     marginVertical: 10,
   },
   contentContainer: {
-    overflow: 'hidden',
+    overflow: "hidden",
+    marginLeft: 10,
   },
   infoContainer: {
-    marginBottom: 10,
+    marginBottom: 20,
   },
-  infoItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+  tableHeader: {
+    flexDirection: "row",
+    marginTop: 10,
+    justifyContent: "space-between",
   },
-  infoItemwarga: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
+  headerCell: {
+    alignItems: "center",
   },
-  dot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    marginLeft: 15,
+  circle: {
+    height: 16,
+    width: 16,
+    borderRadius: 8,
+    marginBottom: 4,
   },
-  wilayahText: {
-    flex: 1,
-    fontSize: 14,
-    marginLeft: 15,
+  tableHeaderText: {
+    fontSize: 12,
+    color: "#000",
+    fontWeight: "bold",
   },
-  wargaText: {
-    fontWeight: 'bold',
-    marginBottom: 5,
-    marginRight: 25,
-  },
-  totalText: {
-    fontWeight: 'bold',
-    marginLeft: 40,
-  },
-  number: {
-    marginRight: 25,
-    fontWeight: 'bold',
-    fontSize: 14,
-  },
-  totalItem: {
-    marginTop: 5,
-  },
-  chart: {
-    marginVertical: 8,
-    borderRadius: 20,
-  },
-  detailButton: {
-    backgroundColor: '#4a90e2',
-    padding: 15,
-    borderRadius: 30,
-    alignItems: 'center',
+  chartFooter: {
+    textAlign: "center",
+    fontSize: 12,
+    color: "gray",
     marginTop: 10,
   },
-  buttonText: {
-    color: 'white',
-    fontWeight: 'bold',
+  loadingText: {
+    textAlign: "center",
+    fontSize: 18,
+  },
+  detailButton: {
+    marginTop: 20,
   },
 });
