@@ -6,6 +6,12 @@ import Home from "../../pages/home";
 import Login_page from "../../pages/login_page";
 import Profile from "../../pages/profile";
 import Edit from "../../pages/edit";
+import Dashboard from "../../pages/dashboard";
+import Detail_pelayanan from "../../pages/detail_pelayanan";
+import Detail_disabilitas from "../../pages/detail_disabilitas";
+import Detail_gender from "../../pages/detail_gender";
+import Detail_golongandarah from "../../pages/detail_golongandarah";
+import Detail_pekerjaan from "../../pages/detail_pekerjaan";
 import Form_warga from "../../pages/form_warga";
 import Form_warga_2 from "../../pages/form_warga_2";
 import Form_warga_3 from "../../pages/form_warga_3";
@@ -23,6 +29,7 @@ function MainTabs() {
       }}
     >
       <Tab.Screen name="Home" component={Home} />
+      <Tab.Screen name="Dashboard" component={Dashboard} />
       <Tab.Screen name="Profile" component={Profile} />
       <Tab.Screen name="Edit" component={Edit} />
       <Tab.Screen name="Profile" component={Profile} />
@@ -46,6 +53,13 @@ export default function Router() {
         <Stack.Screen name="Login_page" component={Login_page} />
         <Stack.Screen name="Home" component={Home} />
         <Stack.Screen name="Edit" component={Edit} />
+        <Stack.Screen name="Form" component={Form} />
+        <Stack.Screen name="Dashboard" component={Dashboard} />
+        <Stack.Screen name="Detail_pelayanan" component={Detail_pelayanan} />
+        <Stack.Screen name="Detail_pekerjaan" component={Detail_pekerjaan} />
+        <Stack.Screen name="Detail_golongandarah" component={Detail_golongandarah} />
+        <Stack.Screen name="Detail_gender" component={Detail_gender} />
+        <Stack.Screen name="Detail_disabilitas" component={Detail_disabilitas} />
         <Stack.Screen name="Form_warga" component={Form_warga} />
         <Stack.Screen name="Form_warga_2" component={Form_warga_2} />
         <Stack.Screen name="Form_warga_3" component={Form_warga_3} />
