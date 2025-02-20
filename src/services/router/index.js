@@ -53,7 +53,6 @@ export default function Router() {
         <Stack.Screen name="Login_page" component={Login_page} />
         <Stack.Screen name="Home" component={Home} />
         <Stack.Screen name="Edit" component={Edit} />
-        <Stack.Screen name="Form" component={Form} />
         <Stack.Screen name="Dashboard" component={Dashboard} />
         <Stack.Screen name="Detail_pelayanan" component={Detail_pelayanan} />
         <Stack.Screen name="Detail_pekerjaan" component={Detail_pekerjaan} />

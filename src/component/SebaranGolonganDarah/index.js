@@ -197,7 +197,7 @@ export default function SebaranGender({ navigation }) {
               )}
             </View>
           )}
-          <Text style={styles.chartFooter}>Golongan Darah</Text>
+          <Text style={styles.chartFooter}>Wilayah</Text>
         </View>
 
         <ButtonDetail
