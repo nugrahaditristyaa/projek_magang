@@ -12,7 +12,7 @@
     "@gorhom/bottom-sheet": "^4.6.4",
     "@react-native-community/datetimepicker": "^8.0.1",
     "@react-native-firebase/app": "^21.4.0",
-    "@react-native-picker/picker": "^2.10.2",
+    "@react-native-picker/picker": "^2.7.5",
     "@react-navigation/bottom-tabs": "^6.6.1",
     "@react-navigation/native": "^6.1.18",
     "@react-navigation/native-stack": "^6.11.0",
@@ -24,7 +24,6 @@
     "expo-splash-screen": "^0.27.7",
     "expo-status-bar": "~1.12.1",
     "install": "^0.13.0",
-    "kit": "^1.0.26",
     "native": "^0.3.3",
     "npm": "^11.0.0",
     "react": "^18.2.0",
@@ -35,19 +34,22 @@
     "react-native-dropdown-picker": "^5.4.6",
     "react-native-gifted-charts": "^1.4.47",
     "react-native-linear-gradient": "^2.8.3",
+    "react-native-modal-datetime-picker": "^18.0.0",
     "react-native-month-year-picker": "^1.9.0",
     "react-native-paper": "^5.12.5",
     "react-native-reanimated": "~3.10.1",
     "react-native-safe-area-context": "^4.10.5",
     "react-native-screens": "^3.31.1",
-    "react-native-svg": "^15.10.1",
+    "react-native-svg": "^15.2.0",
     "react-native-svg-transformer": "^1.5.0",
     "react-native-table-component": "^1.2.2",
     "react-native-vector-icons": "^10.2.0",
     "typescript": "~5.3.3"
   },
   "devDependencies": {
-    "@babel/core": "^7.20.0"
+    "@babel/core": "^7.20.0",
+    "babel-loader": "^9.2.1",
+    "webpack": "^5.97.1"
   },
   "private": true
 }
