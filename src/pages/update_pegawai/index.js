@@ -1,26 +1,56 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { View, StyleSheet, ScrollView, Text, Alert } from "react-native";
 import { TextInput, Button, RadioButton } from "react-native-paper";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
-import { Picker } from "@react-native-picker/picker";
 import adapter from "../../services/adapter";
-import { useNavigation, useRoute } from "@react-navigation/native";
+import { Picker } from "@react-native-picker/picker";
+import { useFocusEffect } from "@react-navigation/native";
+import moment from "moment";
+import { useNavigation } from "@react-navigation/native"; // Import useNavigation
 
-const MajelisForm = () => {
+const PegawaiUpdateForm = ({ route }) => {
+  const { id } = route.params;
   const navigation = useNavigation();
   const [formData, setFormData] = useState({
     nama: "",
-    kode_wilayah: "",
-    jabatan: "",
-    periode_jabatan: "",
-    tanggal_SK: "",
-    tgl_penahbisan: "",
-    status_aktif: "",
-    kode_user: "1",
+    posisi: "",
+    tanggal_masuk: "",
+    tanggal_keluar: "", // Opsional
+    status_aktif: "", // Opsional
   });
 
   const [datePicker, setDatePicker] = useState({ visible: false, field: "" });
   const [isLoading, setIsLoading] = useState(false);
+
+  const fetchData = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const response = await adapter.getPegawaiById(id);
+
+      if (response) {
+        // Format tanggal_masuk dan tanggal_keluar
+        const formattedData = {
+          ...response,
+          tanggal_masuk: response.tanggal_masuk
+            ? new Date(response.tanggal_masuk).toISOString().split("T")[0]
+            : "",
+          tanggal_keluar: response.tanggal_keluar
+            ? new Date(response.tanggal_keluar).toISOString().split("T")[0]
+            : "",
+        };
+
+        setFormData(formattedData); // Set data yang sudah diformat
+      }
+    } catch (error) {
+      Alert.alert("Gagal", "Gagal mengambil data.");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [id]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const handleInputChange = (field, value) => {
     setFormData({ ...formData, [field]: value });
@@ -53,59 +83,51 @@ const MajelisForm = () => {
 
   const fieldLabels = {
     nama: "Nama",
-    kode_wilayah: "Kode Wilayah",
-    jabatan: "Jabatan",
-    periode_jabatan: "Periode Jabatan",
-    tanggal_SK: "Tanggal SK",
-    // tgl_penahbisan: "Tanggal Penahbisan",
-    // status_aktif: "Status Aktif",
+    posisi: "Posisi",
+    tanggal_masuk: "Tanggal Masuk",
+    tanggal_keluar: "Tanggal Keluar",
+    status_aktif: "Status Aktif",
   };
 
   const handleSubmit = async () => {
-    // Field yang wajib diisi (tidak termasuk tgl_penahbisan dan status_aktif)
-    const requiredFields = [
-      "nama",
-      "kode_wilayah",
-      "jabatan",
-      "periode_jabatan",
-      "tanggal_SK",
-    ];
-
+    const requiredFields = ["nama", "posisi", "tanggal_masuk"];
     const emptyFields = requiredFields.filter((field) => !formData[field]);
 
     if (emptyFields.length > 0) {
       const missingFields = emptyFields
         .map((field) => fieldLabels[field])
         .join(", ");
-      Alert.alert("Gagal", `Kolom yang wajib diisi: ${missingFields}`);
+      Alert.alert("Gagal", `Harap isi semua kolom: ${missingFields}`);
       return;
     }
 
-    // Jika tgl_penahbisan tidak diisi, kirim sebagai null atau string kosong
-    const dataToSend = {
-      ...formData,
-      tgl_penahbisan: formData.tgl_penahbisan ? formData.tgl_penahbisan : null,
-      status_aktif: formData.status_aktif
-        ? formData.status_aktif
-        : "Tidak Aktif",
-    };
+    // Buat salinan data sebelum dikirim
+    const dataToSend = { ...formData };
+
+    // Jika tanggal_keluar kosong, hapus dari objek agar tidak dikirim sebagai string kosong
+    if (!dataToSend.tanggal_keluar) {
+      delete dataToSend.tanggal_keluar;
+    }
+
+    // Jika status_aktif kosong, hapus dari objek agar tidak dikirim sebagai string kosong
+    if (!dataToSend.status_aktif) {
+      delete dataToSend.status_aktif;
+    }
 
     setIsLoading(true);
     try {
-      await adapter.postMajelis(dataToSend);
+      const response = await adapter.updatePegawaiById(id, dataToSend); // Kirim data ke API
       Alert.alert("Sukses", "Data berhasil disimpan!");
       navigation.goBack(); // Kembali ke halaman sebelumnya setelah berhasil
 
-      // Reset form setelah sukses
+      // Reset form setelah berhasil
       setFormData({
         nama: "",
-        kode_wilayah: "",
-        jabatan: "",
-        periode_jabatan: "",
-        tanggal_SK: "",
-        tgl_penahbisan: "",
+        posisi: "",
+        tanggal_masuk: "",
+        tanggal_keluar: "",
         status_aktif: "",
-        kode_user: "",
+        kode_user: "1",
       });
     } catch (error) {
       Alert.alert("Gagal", "Harap isi data dengan format yang benar.");
@@ -116,7 +138,7 @@ const MajelisForm = () => {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Formulir Majelis Gereja</Text>
+      <Text style={styles.title}>Formulir Update Pegawai</Text>
 
       <Text style={styles.label}>
         Nama <Text style={styles.required}>*</Text>
@@ -129,89 +151,59 @@ const MajelisForm = () => {
       />
 
       <Text style={styles.label}>
-        Kode Wilayah <Text style={styles.required}>*</Text>
+        Posisi <Text style={styles.required}>*</Text>
       </Text>
       <View style={styles.pickerContainer}>
         <Picker
-          selectedValue={formData.kode_wilayah}
-          onValueChange={(itemValue) =>
-            handleInputChange("kode_wilayah", itemValue)
-          }
+          selectedValue={formData.posisi}
+          onValueChange={(itemValue) => handleInputChange("posisi", itemValue)}
         >
-          <Picker.Item label="Pilih Kode Wilayah" value="" />
-          <Picker.Item label="Wilayah 1" value="1" />
-          <Picker.Item label="Wilayah 3" value="3" />
-          <Picker.Item label="Wilayah 4" value="4" />
-          <Picker.Item label="Wilayah 5" value="5" />
-        </Picker>
-      </View>
-
-      <Text style={styles.label}>
-        Jabatan <Text style={styles.required}>*</Text>
-      </Text>
-      <View style={styles.pickerContainer}>
-        <Picker
-          selectedValue={formData.jabatan}
-          onValueChange={(itemValue) => handleInputChange("jabatan", itemValue)}
-        >
-          <Picker.Item label="Pilih Jabatan" value="" />
-          <Picker.Item label="Penatua" value="Penatua" />
-          <Picker.Item label="Diaken" value="Diaken" />
+          <Picker.Item label="Pilih Posisi" value="" />
           <Picker.Item label="Pendeta" value="Pendeta" />
+          <Picker.Item label="Majelis" value="Majelis" />
+          <Picker.Item label="Admin" value="Admin" />
         </Picker>
       </View>
 
       <Text style={styles.label}>
-        Periode Jabatan <Text style={styles.required}>*</Text>
-      </Text>
-      <TextInput
-        label="Masukan Periode Jabatan"
-        value={formData.periode_jabatan}
-        onChangeText={(text) => handleInputChange("periode_jabatan", text)}
-        style={styles.input}
-      />
-
-      <Text style={styles.label}>
-        Tanggal SK <Text style={styles.required}>*</Text>
+        Tanggal Masuk <Text style={styles.required}>*</Text>{" "}
       </Text>
       <TextInput
         label="YYYY-MM-DD"
-        value={formData.tanggal_SK}
+        value={formData.tanggal_masuk}
         style={styles.input}
-        onChangeText={(text) => handleManualDateInput("tanggal_SK", text)} // Menangani input manual
+        onChangeText={(text) => handleManualDateInput("tanggal_masuk", text)} // Menangani input manual
         keyboardType="numeric" // Hanya memperbolehkan input numerik
         maxLength={10} // Batas panjang input untuk format yyyy-mm-dd
         right={
           <TextInput.Icon
             icon="calendar"
             onPress={() =>
-              setDatePicker({ visible: true, field: "tanggal_SK" })
+              setDatePicker({ visible: true, field: "tanggal_masuk" })
             }
           />
         }
       />
 
-      <Text style={styles.label}>Tanggal Penahbisan</Text>
+      <Text style={styles.label}>Tanggal Keluar</Text>
       <TextInput
         label="YYYY-MM-DD"
-        value={formData.tgl_penahbisan}
+        value={formData.tanggal_keluar}
         style={styles.input}
-        onChangeText={(text) =>
-          handleManualDateInput("tanggal_penahbisan", text)
-        } // Menangani input manual
+        onChangeText={(text) => handleManualDateInput("tanggal_keluar", text)} // Menangani input manual
         keyboardType="numeric" // Hanya memperbolehkan input numerik
         maxLength={10} // Batas panjang input untuk format yyyy-mm-dd
         right={
           <TextInput.Icon
             icon="calendar"
             onPress={() =>
-              setDatePicker({ visible: true, field: "tgl_penahbisan" })
+              setDatePicker({ visible: true, field: "tanggal_keluar" })
             }
           />
         }
       />
 
-      <Text style={styles.label}>Status Aktif</Text>
+      <Text style={styles.label}>Status Aktif </Text>
       <View style={styles.radioContainer}>
         <RadioButton.Group
           onValueChange={(value) => handleInputChange("status_aktif", value)}
@@ -252,7 +244,7 @@ const MajelisForm = () => {
           buttonColor="#4A90E2"
           textColor="#ffff"
         >
-          Simpan
+          Update
         </Button>
       </View>
     </ScrollView>
@@ -328,4 +320,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default MajelisForm;
+export default PegawaiUpdateForm;

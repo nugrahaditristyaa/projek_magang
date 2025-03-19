@@ -26,9 +26,14 @@ export default function TambahDataScreen({ navigation }) {
               style={styles.primaryButton}
               onPress={() => navigation.navigate("Form_warga")}
             >
+              <Icon name="account-plus" size={20} color="#fff" />
               <Text style={styles.buttonText}>Tambah Data</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.secondaryButton}>
+            <TouchableOpacity
+              style={styles.secondaryButton}
+              onPress={() => navigation.navigate("Lihat_detail_jemaat")}
+            >
+              <Icon name="eye" size={20} color="#4A90E2" />
               <Text style={styles.detail}>Lihat Detail</Text>
             </TouchableOpacity>
           </View>
@@ -42,9 +47,14 @@ export default function TambahDataScreen({ navigation }) {
               style={styles.primaryButton}
               onPress={() => navigation.navigate("Form_majelis")}
             >
+              <Icon name="account-plus" size={20} color="#fff" />
               <Text style={styles.buttonText}>Tambah Data</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.secondaryButton}>
+            <TouchableOpacity
+              style={styles.secondaryButton}
+              onPress={() => navigation.navigate("Lihat_detail_majelis")}
+            >
+              <Icon name="eye" size={20} color="#4A90E2" />
               <Text style={styles.detail}>Lihat Detail</Text>
             </TouchableOpacity>
           </View>
@@ -58,9 +68,14 @@ export default function TambahDataScreen({ navigation }) {
               style={styles.primaryButton}
               onPress={() => navigation.navigate("Form_pegawai")}
             >
+              <Icon name="account-plus" size={20} color="#fff" />
               <Text style={styles.buttonText}>Tambah Data</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.secondaryButton}>
+            <TouchableOpacity
+              style={styles.secondaryButton}
+              onPress={() => navigation.navigate("Lihat_detail_pegawai")}
+            >
+              <Icon name="eye" size={20} color="#4A90E2" />
               <Text style={styles.detail}>Lihat Detail</Text>
             </TouchableOpacity>
           </View>
@@ -89,29 +104,47 @@ export default function TambahDataScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
   },
   header: {
     backgroundColor: "#63ACE1",
     padding: 20,
     alignItems: "center",
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 8,
   },
   headerTitle: {
-    fontSize: 20,
+    fontSize: 25,
     color: "#fff",
-    fontWeight: "bold",
-    marginTop: 20,
+    fontFamily: "semiBold",
+    marginTop: 10,
+    paddingTop: 30,
+    marginBottom: 5,
+    paddingBottom: 5,
   },
   contentContainer: {
     padding: 20,
   },
   section: {
-    marginBottom: 15, // Jarak antar bagian diperbaiki
+    marginBottom: 20,
+    backgroundColor: "#fff",
+    borderRadius: 15,
+    padding: 15,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 3,
   },
   sectionTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 8, // Jarak bawah diperbaiki
+    fontSize: 15,
+    marginBottom: 10,
+    color: "#333",
+    fontFamily: "semiBold",
   },
   buttonRow: {
     flexDirection: "row",
@@ -119,25 +152,40 @@ const styles = StyleSheet.create({
   },
   primaryButton: {
     backgroundColor: "#63ACE1",
-    padding: 10,
+    padding: 12,
     borderRadius: 10,
     flex: 1,
     marginRight: 10,
     alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 4,
   },
   secondaryButton: {
     backgroundColor: "#fff",
-    padding: 10,
+    padding: 12,
     borderRadius: 10,
     flex: 1,
     marginLeft: 10,
-    borderColor: "#ddd",
+    borderColor: "#4A90E2",
     borderWidth: 1,
     alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
   },
   buttonText: {
     color: "#fff",
     fontWeight: "bold",
+    marginLeft: 8,
   },
   bottomNavigation: {
     flexDirection: "row",
@@ -146,9 +194,15 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: "#ddd",
     backgroundColor: "#fff",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 8,
   },
   detail: {
-    color: "#333",
+    color: "#4A90E2",
     fontWeight: "bold",
+    marginLeft: 8,
   },
 });

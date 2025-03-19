@@ -8,11 +8,12 @@ export default function ButtonApp({
   title,
   color,
   style,
+  onPress,
 }) {
   return (
     <TouchableOpacity
       style={[styles.button, style]} // Terapkan gaya tambahan
-      onPress={() => navigation.navigate(navigasi)}
+      onPress={onPress}
     >
       <Text style={styles.buttonText}>{title}</Text>
     </TouchableOpacity>

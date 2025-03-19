@@ -1,12 +1,18 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { View, StyleSheet, ScrollView, Text, Alert } from "react-native";
 import { TextInput, Button, RadioButton } from "react-native-paper";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
-import { useNavigation } from "@react-navigation/native"; // Import useNavigation
+import { getJemaatById, updateJemaat } from "../../services/adapter"; // Pastikan path sesuai dengan lokasi file api.js
 import { Picker } from "@react-native-picker/picker";
+import adapter from "../../services/adapter";
+import { useNavigation, useRoute } from "@react-navigation/native";
 
-const JemaatForm = () => {
+const UpdateJemaatForm = () => {
   const navigation = useNavigation();
+  const route = useRoute();
+  const { no_urut } = route.params; // Ambil ID jemaat dari parameter route
+  console.log("id_detail from route.params:", no_urut);
+
   const [formData, setFormData] = useState({
     no_kk: "",
     kode_wilayah: "",
@@ -33,18 +39,93 @@ const JemaatForm = () => {
     alasan_tidak_aktif: "",
   });
 
+  // Fungsi untuk mereset form
+  const resetForm = () => {
+    setFormData({
+      no_kk: "",
+      kode_wilayah: "",
+      nama: "",
+      tempat_lahir: "",
+      tgl_lahir: "",
+      jenis_kelamin: "",
+      hubungan_keluarga: "",
+      status_nikah: "",
+      golongan_darah: "",
+      hobby: "",
+      telepon: "",
+      email: "",
+      pekerjaan: "",
+      bidang: "",
+      kerja_sampingan: "",
+      alamat_kantor: "",
+      pendidikan: "",
+      jurusan: "",
+      alamat_sekolah: "",
+      status_jemaat: "",
+      keaktifan_jemaat: "",
+      tgl_tidak_aktif: "",
+      alasan_tidak_aktif: "",
+    });
+  };
+
   const [datePicker, setDatePicker] = useState({ visible: false, field: "" });
 
+  useEffect(() => {
+    if (!no_urut) {
+      Alert.alert("Gagal", "ID tidak valid.");
+      navigation.goBack();
+      return;
+    }
+
+    const fetchData = async () => {
+      try {
+        const response = await adapter.getJemaatById(no_urut);
+        console.log("form update by id data::", response);
+
+        if (response) {
+          // Format tanggal_lahir dan tgl_tidak_aktif
+          const formattedData = {
+            ...response,
+            tgl_lahir: response.tgl_lahir
+              ? new Date(response.tgl_lahir).toISOString().split("T")[0]
+              : null, // Kirim null jika kosong
+            tgl_tidak_aktif: response.tgl_tidak_aktif
+              ? new Date(response.tgl_tidak_aktif).toISOString().split("T")[0]
+              : null, // Kirim null jika kosong
+          };
+
+          setFormData(formattedData); // Set data yang sudah diformat
+        }
+      } catch (error) {
+        Alert.alert("Gagal", "Gagal mengambil data.");
+      }
+    };
+
+    fetchData();
+  }, [no_urut, navigation]);
+
   const fieldLabels = {
+    no_kk: "NO KK",
+    kode_wilayah: "Kode Wilayah",
     nama: "Nama",
     tempat_lahir: "Tempat Lahir",
     tgl_lahir: "Tanggal Lahir",
     jenis_kelamin: "Jenis Kelamin",
     hubungan_keluarga: "Hubungan Keluarga",
     status_nikah: "Status Nikah",
+    golongan_darah: "Golongan Darah",
+    hobby: "Hobby",
+    telepon: "Telepon",
+    email: "Email",
+    pekerjaan: "Pekerjaan",
+    kerja_sampingan: "Kerja Sampingan",
+    alamat_kantor: "Alamat Kantor",
+    pendidikan: "jurusan",
+    alamat_sekolah: "Alamat Sekolah",
     status_jemaat: "Status Jemaat",
-    kode_wilayah: "Kode Wilayah",
     keaktifan_jemaat: "Keaktifan Jemaat",
+    tgl_tidak_aktif: "Tanggal Tidak Aktif",
+    alasan_tidak_aktif: "Alasan Tidak Aktif",
   };
 
   const requiredFields = [
@@ -108,14 +189,96 @@ const JemaatForm = () => {
     }
 
     // Jika validasi berhasil, lanjutkan navigasi
-    navigation.navigate("Form_detail", {
-      formData,
+    navigation.navigate("Update_detail", {
+      no_urut: no_urut,
+      no_induk_jemaat: formData.no_induk_jemaat, // Kirim no_induk_jemaat
+      formData: formData,
     });
   };
 
+  // const [isLoading, setIsLoading] = useState(false);
+
+  // const fetchData = useCallback(async () => {
+  //   setIsLoading(true);
+  //   try {
+  //     const response = await adapter.getJemaatById(no_urut);
+  //     console.log("API Response:", response);
+  //     if (response.data) {
+  //       setFormData(response.data);
+  //     }
+  //   } catch (error) {
+  //     console.error("[API] getJemaatById Error:", error);
+  //     Alert.alert("Gagal", "Gagal mengambil data.");
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // }, [no_urut]);
+
+  // const handleSubmit = async () => {
+  //   const emptyFields = requiredFields.filter((field) => !formData[field]);
+
+  //   if (emptyFields.length > 0) {
+  //     const missingFields = emptyFields
+  //       .map((field) => fieldLabels[field])
+  //       .join(", ");
+  //     Alert.alert("Gagal", `Kolom yang wajib diisi: ${missingFields}`);
+  //     return;
+  //   }
+
+  //   // Mengatur data sebelum dikirim
+  //   const updatedFormData = { ...formData };
+
+  //   // Jika ada field opsional yang kosong, kita bisa menghapusnya dari request
+  //   Object.keys(updatedFormData).forEach((key) => {
+  //     if (updatedFormData[key] === "") {
+  //       delete updatedFormData[key];
+  //     }
+  //   });
+
+  //   // Jika status jemaat "Tidak Aktif", pastikan alasan dan tanggal diisi
+  //   if (formData.keaktifan_jemaat === "Tidak Aktif") {
+  //     if (!formData.tgl_tidak_aktif || !formData.alasan_tidak_aktif) {
+  //       Alert.alert(
+  //         "Gagal",
+  //         "Jika jemaat tidak aktif, harap isi tanggal dan alasan tidak aktif"
+  //       );
+  //       return;
+  //     }
+  //   }
+
+  //   setIsLoading(true);
+  //   console.log("prepare req data", updatedFormData);
+  //   try {
+  //     const response = await adapter.updateJemaatById(no_urut, updatedFormData);
+  //     Alert.alert("Sukses", "Data jemaat berhasil diperbarui!");
+  //     console.log("Response dari API:", response);
+  //   } catch (error) {
+  //     console.error("[API] updateJemaat Error:", error);
+  //     if (error.response) {
+  //       console.error(
+  //         "Response Error:",
+  //         error.response.status,
+  //         error.response.data
+  //       );
+  //       Alert.alert(
+  //         "Gagal",
+  //         `Terjadi kesalahan: ${error.response.data.message}`
+  //       );
+  //     } else if (error.request) {
+  //       console.error("Request Error:", error.request);
+  //       Alert.alert("Gagal", "Tidak ada respons dari server.");
+  //     } else {
+  //       console.error("General Error:", error.message);
+  //       Alert.alert("Gagal", `Terjadi kesalahan: ${error.message}`);
+  //     }
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Formulir Data Warga Jemaat</Text>
+      <Text style={styles.title}>Formulir Update Data Warga Jemaat</Text>
 
       <Text style={styles.label}>
         Nama <Text style={styles.required}>*</Text>{" "}
@@ -164,8 +327,8 @@ const JemaatForm = () => {
           value={formData.jenis_kelamin}
         >
           <View style={styles.radioItem}>
-            <RadioButton value="Laki-laki" />
-            <Text>Laki-laki</Text>
+            <RadioButton value="Laki-Laki" />
+            <Text>Laki-Laki</Text>
           </View>
           <View style={styles.radioItem}>
             <RadioButton value="Perempuan" />
@@ -176,8 +339,8 @@ const JemaatForm = () => {
 
       <View style={styles.radioContainer}>
         <Text style={styles.radioLabel}>
-          Hubungan Keluarga (status dalam KK)
-          <Text style={styles.required}>*</Text>
+          Hubungan Keluarga (status dalam KK){" "}
+          <Text style={styles.required}>*</Text>{" "}
         </Text>
         <RadioButton.Group
           onValueChange={(value) =>
@@ -289,21 +452,13 @@ const JemaatForm = () => {
         </Picker>
       </View>
 
-      <Text style={styles.label}>No KK </Text>
+      <Text style={styles.label}>No KK</Text>
       <TextInput
         label="Masukan NO KK"
         value={formData.no_kk}
         onChangeText={(text) => handleInputChange("no_kk", text)}
         style={styles.input}
       />
-
-      {/* <Text style={styles.label}>Kode Wilayah</Text>
-      <TextInput
-        label="Masukan Kode Wilayah"
-        value={formData.kode_wilayah}
-        onChangeText={(text) => handleInputChange("kode_wilayah", text)}
-        style={styles.input}
-      /> */}
 
       <Text style={styles.label}>Alamat Kantor</Text>
       <TextInput
@@ -464,8 +619,7 @@ const JemaatForm = () => {
 
       <View style={styles.buttonContainer}>
         <Button
-          mode="contained"
-          onPress={() => navigation.navigate("Edit")}
+          onPress={() => navigation.navigate("Lihat_detail_jemaat")}
           buttonColor="#4A90E2"
           textColor="#ffff"
         >
@@ -556,4 +710,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default JemaatForm;
+export default UpdateJemaatForm;

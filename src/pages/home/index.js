@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import {
   View,
   Text,
@@ -20,13 +21,19 @@ export default function Home({ navigation }) {
   const [sebaranWilayah, setsebaranWilayah] = useState({});
   const [maxValue, setmaxValue] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [data, setData] = useState([]);
 
-  const getAPI = async () => {
+  const fetchData = async () => {
     try {
+      setIsLoading(true);
       const jemaat = await adapter.getTotalJemaat();
+      setData(jemaat);
       const majelis = await adapter.getTotalMajelis();
+      setData(majelis);
       const pegawai = await adapter.getTotalPegawai();
+      setData(pegawai);
       const wilayah = await adapter.getSebaranJemaat();
+      setData(wilayah);
 
       const labels = wilayah.map((item) => `Wilayah ${item.kode_wilayah}`);
       const dataValues = wilayah.map((item) => item.jumlah);
@@ -53,9 +60,11 @@ export default function Home({ navigation }) {
     }
   };
 
-  useEffect(() => {
-    getAPI();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchData();
+    }, [])
+  );
 
   const chartConfig = {
     backgroundColor: "#ffffff",
@@ -85,48 +94,67 @@ export default function Home({ navigation }) {
   }
 
   return (
-    <ScrollView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>GKJ Dayu</Text>
-      </View>
+    <View style={styles.container}>
+      {/* Scrollable Content */}
+      <ScrollView style={styles.scrollContainer}>
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>GKJ Dayu</Text>
+        </View>
 
-      {/* Statistik Card */}
-      <View style={styles.statsContainer}>
-        <View style={styles.statCard}>
-          <Text style={styles.statTitle}>Warga Gereja</Text>
-          <Text style={styles.statNumber}>{totalJemaat[0].jumlah_jemaat}</Text>
+        {/* Statistik Card */}
+        <View style={styles.statsContainer}>
+          <View style={[styles.statCard, { backgroundColor: "#fff" }]}>
+            <Icon name="account-group" size={30} color="#4A90E2" />
+            <Text style={styles.statTitle}>Warga Gereja</Text>
+            <Text style={styles.statNumber}>
+              {totalJemaat[0].jumlah_jemaat}
+            </Text>
+          </View>
+          <View style={[styles.statCard, { backgroundColor: "#fff" }]}>
+            <Icon name="account-tie" size={30} color="#4A90E2" />
+            <Text style={styles.statTitle}>Majelis Gereja</Text>
+            <Text style={styles.statNumber}>
+              {totalMajelis[0].jumlah_majelis}
+            </Text>
+          </View>
+          <View style={[styles.statCard, { backgroundColor: "#fff" }]}>
+            <Icon name="briefcase-account" size={30} color="#4A90E2" />
+            <Text style={styles.statTitle}>Pegawai Gereja</Text>
+            <Text style={styles.statNumber}>
+              {totalPegawai[0].jumlah_pegawai}
+            </Text>
+          </View>
         </View>
-        <View style={styles.statCard}>
-          <Text style={styles.statTitle}>Majelis Gereja</Text>
-          <Text style={styles.statNumber}>
-            {totalMajelis[0].jumlah_majelis}
-          </Text>
-        </View>
-        <View style={styles.statCard}>
-          <Text style={styles.statTitle}>Pegawai Gereja</Text>
-          <Text style={styles.statNumber}>
-            {totalPegawai[0].jumlah_pegawai}
-          </Text>
-        </View>
-      </View>
 
-      {/* Grafik Bar */}
-      <View style={styles.chartContainer}>
-        <Text style={styles.chartTitle}>
-          Total Jemaat GKJ Dayu: {totalJemaat[0].jumlah_jemaat}
-        </Text>
-        <BarChart
-          data={sebaranWilayah}
-          width={screenWidth - 40}
-          height={220}
-          chartConfig={chartConfig}
-          style={styles.chartStyle}
-          yAxisMax={maxValue}
-          yAxisMin={1}
-        />
-        <Text style={styles.detailButton}>Lihat Detail</Text>
-      </View>
+        {/* Grafik Bar */}
+        <View style={styles.chartContainer}>
+          <Text style={styles.chartTitle}>
+            Total Jemaat GKJ Dayu: {totalJemaat[0].jumlah_jemaat}
+          </Text>
+          <BarChart
+            data={sebaranWilayah}
+            width={screenWidth - 40}
+            height={220}
+            chartConfig={chartConfig}
+            style={styles.chartStyle}
+            yAxisLabel="" // Label sumbu Y (opsional)
+            yAxisSuffix="" // Suffix sumbu Y (opsional)
+            yAxisInterval={10} // Interval sumbu Y
+            fromZero={true} // Memastikan grafik dimulai dari 0
+            showValuesOnTopOfBars={true} // Menampilkan nilai di atas bar
+            withInnerLines={true} // Menampilkan garis horizontal di dalam grafik
+            withVerticalLabels={true} // Menampilkan label vertikal
+            withHorizontalLabels={true} // Menampilkan label horizontal
+            segments={8} // Jumlah segmen pada sumbu Y
+          />
+          <TouchableOpacity
+            onPress={() => navigation.navigate("Lihat_detail_jemaat")}
+          >
+            <Text style={styles.detailButton}>Lihat Detail</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
 
       {/* Navigasi Bawah */}
       <View style={styles.bottomNavigation}>
@@ -143,7 +171,7 @@ export default function Home({ navigation }) {
           <Icon name="account" size={30} color="#4A90E2" />
         </TouchableOpacity>
       </View>
-    </ScrollView>
+    </View>
   );
 }
 
@@ -152,39 +180,45 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#f5f5f5",
   },
+  scrollContainer: {
+    flex: 1,
+  },
   header: {
     backgroundColor: "#63ACE1",
     padding: 20,
-    flexDirection: "row",
-    justifyContent: "center",
     alignItems: "center",
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 8,
   },
   headerTitle: {
     fontSize: 25,
     color: "#fff",
     fontFamily: "semiBold",
-    marginTop: 20,
+    marginTop: 10,
+    paddingTop: 30,
+    marginBottom: 5,
+    paddingBottom: 5,
   },
   statsContainer: {
     marginVertical: 20,
     paddingHorizontal: 20,
   },
   statCard: {
-    backgroundColor: "#fff",
     padding: 15,
-    marginBottom: 10,
-    borderRadius: 10,
+    marginBottom: 15,
+    borderRadius: 15,
     shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
     alignItems: "center",
-    justifyContent: "space-between",
-    flexDirection: "row",
+    justifyContent: "center",
   },
   statTitle: {
     fontSize: 16,
@@ -216,28 +250,12 @@ const styles = StyleSheet.create({
     color: "#4A90E2",
     textDecorationLine: "underline",
   },
-  button: {
-    backgroundColor: "#4A90E2",
-    padding: 15,
-    borderRadius: 10,
-    alignItems: "center",
-    marginHorizontal: 40,
-    marginVertical: 20,
-  },
-  buttonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
   bottomNavigation: {
     flexDirection: "row",
     justifyContent: "space-around",
     paddingVertical: 10,
-    borderTopWidth: 115,
+    borderTopWidth: 1,
     borderTopColor: "#ddd",
     backgroundColor: "#fff",
-  },
-  icon: {
-    padding: 5,
   },
 });

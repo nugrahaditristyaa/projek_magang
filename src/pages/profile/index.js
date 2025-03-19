@@ -1,32 +1,37 @@
 import React from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import { useNavigation, useRoute } from "@react-navigation/native";
 
 const ProfileScreen = () => {
+  const navigation = useNavigation();
   return (
     <View style={styles.container}>
       {/* Bagian atas profil */}
       <View style={styles.profileHeader}>
         <View style={styles.avatar}>
-          <Text style={styles.avatarText}>F</Text>
+          <Text style={styles.avatarText}>G</Text>
         </View>
         <View style={styles.profileInfo}>
           <Text style={styles.profileName}>GKJ Yogyakarta</Text>
           <Text style={styles.profileEmail}>gkjdayu.yogyakarta@gmail.com</Text>
         </View>
-        <TouchableOpacity style={styles.editIcon}>
-          <Icon name="pencil" size={24} color="#4A90E2" />
-        </TouchableOpacity>
       </View>
 
       {/* Bagian Info */}
       <View style={styles.infoSection}>
-        <TouchableOpacity style={styles.infoItem}>
+        <TouchableOpacity
+          style={styles.infoItem}
+          onPress={() => navigation.navigate("Cetak_informasi")}
+        >
           <Icon name="file-document-outline" size={24} color="#4A90E2" />
           <Text style={styles.infoText}>Cetak Informasi</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.infoItem}>
+        <TouchableOpacity
+          style={styles.infoItem}
+          onPress={() => navigation.replace("Login_page")}
+        >
           <Icon name="logout" size={24} color="#4A90E2" />
           <Text style={styles.infoText}>Keluar</Text>
         </TouchableOpacity>

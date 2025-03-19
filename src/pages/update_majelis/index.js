@@ -1,13 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, StyleSheet, ScrollView, Text, Alert } from "react-native";
 import { TextInput, Button, RadioButton } from "react-native-paper";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
-import { Picker } from "@react-native-picker/picker";
+import { getMajelisById, updateMajelis } from "../../services/adapter"; // Pastikan path sesuai dengan lokasi file api.js
 import adapter from "../../services/adapter";
-import { useNavigation, useRoute } from "@react-navigation/native";
+import { Picker } from "@react-native-picker/picker";
+import { useNavigation } from "@react-navigation/native"; // Import useNavigation
 
-const MajelisForm = () => {
+const MajelisUpdateForm = ({ route }) => {
   const navigation = useNavigation();
+  const { id_majelis } = route.params; // Ambil ID dari parameter rute
+
   const [formData, setFormData] = useState({
     nama: "",
     kode_wilayah: "",
@@ -16,11 +19,41 @@ const MajelisForm = () => {
     tanggal_SK: "",
     tgl_penahbisan: "",
     status_aktif: "",
-    kode_user: "1",
+    kode_user: "",
   });
 
   const [datePicker, setDatePicker] = useState({ visible: false, field: "" });
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        const response = await adapter.getMajelisById(id_majelis);
+
+        if (response) {
+          // Format tanggal_SK dan tgl_penahbisan
+          const formattedData = {
+            ...response,
+            tanggal_SK: response.tanggal_SK
+              ? new Date(response.tanggal_SK).toISOString().split("T")[0]
+              : "",
+            tgl_penahbisan: response.tgl_penahbisan
+              ? new Date(response.tgl_penahbisan).toISOString().split("T")[0]
+              : "",
+          };
+
+          setFormData(formattedData); // Set data yang sudah diformat
+        }
+      } catch (error) {
+        Alert.alert("Gagal", "Gagal mengambil data.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [id_majelis]);
 
   const handleInputChange = (field, value) => {
     setFormData({ ...formData, [field]: value });
@@ -57,12 +90,12 @@ const MajelisForm = () => {
     jabatan: "Jabatan",
     periode_jabatan: "Periode Jabatan",
     tanggal_SK: "Tanggal SK",
-    // tgl_penahbisan: "Tanggal Penahbisan",
-    // status_aktif: "Status Aktif",
+    tgl_penahbisan: "Tanggal Penahbisan",
+    status_aktif: "Status Aktif",
   };
 
   const handleSubmit = async () => {
-    // Field yang wajib diisi (tidak termasuk tgl_penahbisan dan status_aktif)
+    // Pastikan semua kolom yang wajib terisi
     const requiredFields = [
       "nama",
       "kode_wilayah",
@@ -70,7 +103,6 @@ const MajelisForm = () => {
       "periode_jabatan",
       "tanggal_SK",
     ];
-
     const emptyFields = requiredFields.filter((field) => !formData[field]);
 
     if (emptyFields.length > 0) {
@@ -81,20 +113,26 @@ const MajelisForm = () => {
       return;
     }
 
-    // Jika tgl_penahbisan tidak diisi, kirim sebagai null atau string kosong
-    const dataToSend = {
+    // Pastikan status_aktif memiliki default jika kosong
+    const updatedFormData = {
       ...formData,
-      tgl_penahbisan: formData.tgl_penahbisan ? formData.tgl_penahbisan : null,
-      status_aktif: formData.status_aktif
-        ? formData.status_aktif
-        : "Tidak Aktif",
+      status_aktif: formData.status_aktif ? formData.status_aktif : "",
     };
 
+    // Hapus `tgl_penahbisan` jika kosong
+    if (!formData.tgl_penahbisan) {
+      delete updatedFormData.tgl_penahbisan;
+    }
+
     setIsLoading(true);
+
     try {
-      await adapter.postMajelis(dataToSend);
-      Alert.alert("Sukses", "Data berhasil disimpan!");
-      navigation.goBack(); // Kembali ke halaman sebelumnya setelah berhasil
+      const response = await adapter.updateMajelisById(
+        id_majelis,
+        updatedFormData
+      );
+      Alert.alert("Sukses", "Data berhasil diperbarui!");
+      navigation.goBack();
 
       // Reset form setelah sukses
       setFormData({
@@ -105,7 +143,7 @@ const MajelisForm = () => {
         tanggal_SK: "",
         tgl_penahbisan: "",
         status_aktif: "",
-        kode_user: "",
+        kode_user: "1",
       });
     } catch (error) {
       Alert.alert("Gagal", "Harap isi data dengan format yang benar.");
@@ -116,7 +154,7 @@ const MajelisForm = () => {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Formulir Majelis Gereja</Text>
+      <Text style={styles.title}>Formulir Update Majelis Gereja</Text>
 
       <Text style={styles.label}>
         Nama <Text style={styles.required}>*</Text>
@@ -194,7 +232,7 @@ const MajelisForm = () => {
       <Text style={styles.label}>Tanggal Penahbisan</Text>
       <TextInput
         label="YYYY-MM-DD"
-        value={formData.tgl_penahbisan}
+        value={formData.tanggal_penahbisan}
         style={styles.input}
         onChangeText={(text) =>
           handleManualDateInput("tanggal_penahbisan", text)
@@ -211,7 +249,7 @@ const MajelisForm = () => {
         }
       />
 
-      <Text style={styles.label}>Status Aktif</Text>
+      <Text style={styles.label}>Status Aktif </Text>
       <View style={styles.radioContainer}>
         <RadioButton.Group
           onValueChange={(value) => handleInputChange("status_aktif", value)}
@@ -252,7 +290,7 @@ const MajelisForm = () => {
           buttonColor="#4A90E2"
           textColor="#ffff"
         >
-          Simpan
+          Update
         </Button>
       </View>
     </ScrollView>
@@ -328,4 +366,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default MajelisForm;
+export default MajelisUpdateForm;

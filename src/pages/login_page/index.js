@@ -6,22 +6,36 @@ import {
   Image,
   TextInput,
   TouchableOpacity,
+  Alert,
 } from "react-native";
 import { COLORS, SIZES } from "../../styles";
 import IMAGES from "../../assets/Images";
 import ButtonApp from "../../component/ButtonApp"; // Pastikan path ini benar
+import adapter from "../../services/adapter";
+// import { useNavigation } from "@react-navigation/native";
 
 export default function Login_page({ navigation }) {
-  const [username, setUsername] = useState("");
+  // const navigation = useNavigation(); // Ini akan mengambil navigation dari konteks
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [message, setMessage] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
 
-  const handleLogin = () => {
-    console.log("Username:", username);
-    console.log("Password:", password);
-    console.log("Remember Me:", rememberMe);
-    // Navigasi ke halaman berikutnya jika login berhasil
-    // navigation.navigate('NextPage');
+  const handleLogin = async () => {
+    if (!email.trim() || !password.trim()) {
+      Alert.alert("Error", "Email dan password harap diisi.");
+      return;
+    }
+
+    const result = await adapter.loginUser(email, password);
+    console.log(result);
+
+    if (result.status === "Gagal") {
+      Alert.alert("Error", result.message.message);
+    } else {
+      Alert.alert("Success", "Login berhasil!");
+      navigation.replace("Home"); // Navigasi ke halaman Home
+    }
   };
 
   return (
@@ -31,11 +45,12 @@ export default function Login_page({ navigation }) {
         <Image style={styles.logo} source={IMAGES.logoGKJDayu} />
       </View>
 
+      <Text style={styles.title}>{message}</Text>
       <TextInput
         style={styles.input}
-        placeholder="Username"
-        value={username}
-        onChangeText={setUsername}
+        placeholder="Email"
+        value={email}
+        onChangeText={setEmail}
       />
       <TextInput
         style={styles.input}
@@ -55,9 +70,8 @@ export default function Login_page({ navigation }) {
       <ButtonApp
         title="Login"
         color={COLORS.primary}
-        navigation={navigation}
-        navigasi="Home" // Ganti dengan nama halaman tujuan Anda
-        style={styles.button} // Tambahkan gaya
+        onPress={handleLogin} // Panggil handleLogin saat tombol ditekan
+        style={styles.button}
       />
     </View>
   );
@@ -89,7 +103,6 @@ const styles = StyleSheet.create({
     height: 50,
     borderColor: "#ccc",
     borderWidth: 1,
-    borderRadius: 50, // Corner radius 50
     paddingHorizontal: 10,
     marginVertical: 10,
   },
@@ -118,6 +131,5 @@ const styles = StyleSheet.create({
   },
   button: {
     width: "100%",
-    borderRadius: 50, // Corner radius 50 untuk tombol login
   },
 });

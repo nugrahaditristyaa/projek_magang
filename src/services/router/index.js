@@ -13,11 +13,19 @@ import Detail_gender from "../../pages/detail_gender";
 import Detail_golongandarah from "../../pages/detail_golongandarah";
 import Detail_pekerjaan from "../../pages/detail_pekerjaan";
 import Form_warga from "../../pages/form_warga";
-import Form_warga_2 from "../../pages/form_warga_2";
-import Form_warga_3 from "../../pages/form_warga_3";
-import Form_warga_4 from "../../pages/form_warga_4";
+import Form_detail from "../../pages/form_detail";
 import Form_pegawai from "../../pages/form_pegawai";
 import Form_majelis from "../../pages/form_majelis";
+import Lihat_detail_majelis from "../../pages/lihat_detail_majelis";
+import Lihat_detail_pegawai from "../../pages/lihat_detail_pegawai";
+import Lihat_detail_jemaat from "../../pages/lihat_detail_jemaat";
+import Update_majelis from "../../pages/update_majelis";
+import Update_pegawai from "../../pages/update_pegawai";
+import Update_jemaat from "../../pages/update_jemaat";
+import Update_detail from "../../pages/update_detail";
+import Cetak_informasi from "../../pages/cetak_informasi";
+import Dashboard from "../../pages/dashboard";
+
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
@@ -60,11 +68,26 @@ export default function Router() {
         <Stack.Screen name="Detail_gender" component={Detail_gender} />
         <Stack.Screen name="Detail_disabilitas" component={Detail_disabilitas} />
         <Stack.Screen name="Form_warga" component={Form_warga} />
-        <Stack.Screen name="Form_warga_2" component={Form_warga_2} />
-        <Stack.Screen name="Form_warga_3" component={Form_warga_3} />
-        <Stack.Screen name="Form_warga_4" component={Form_warga_4} />
+        <Stack.Screen name="Form_detail" component={Form_detail} />
         <Stack.Screen name="Form_pegawai" component={Form_pegawai} />
         <Stack.Screen name="Form_majelis" component={Form_majelis} />
+        <Stack.Screen
+          name="Lihat_detail_majelis"
+          component={Lihat_detail_majelis}
+        />
+        <Stack.Screen
+          name="Lihat_detail_pegawai"
+          component={Lihat_detail_pegawai}
+        />
+        <Stack.Screen
+          name="Lihat_detail_jemaat"
+          component={Lihat_detail_jemaat}
+        />
+        <Stack.Screen name="Cetak_informasi" component={Cetak_informasi} />
+        <Stack.Screen name="Update_majelis" component={Update_majelis} />
+        <Stack.Screen name="Update_pegawai" component={Update_pegawai} />
+        <Stack.Screen name="Update_jemaat" component={Update_jemaat} />
+        <Stack.Screen name="Update_detail" component={Update_detail} />
         <Stack.Screen name="Profile" component={Profile} />
       </Stack.Navigator>
     </BottomSheetModalProvider>
