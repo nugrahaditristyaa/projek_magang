@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   StyleSheet,
   Text,
@@ -8,66 +8,52 @@ import {
   Image,
 } from "react-native";
 import { BarChart } from "react-native-gifted-charts";
-import { Table, Row } from "react-native-table-component";
-import adapter from "../../services/adapter";
 import ButtonDetail from "../ButtonNavigate";
+import adapter from "../../services/adapter";
 
-export default function SebaranGender({ navigation }) {
+export default function SebaranGolonganDarah({ navigation }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [animation, setAnimation] = useState(new Animated.Value(0));
-  const [tableData, setTableData] = useState([]);
   const [grafikData, setGrafikData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedBar, setSelectedBar] = useState(null);
+  const timeoutRef = useRef(null); // Tambahkan useRef untuk menyimpan timeout
 
-  const validateData = (data) => {
+  const processData = (data) => {
     if (!data || !Array.isArray(data)) return [];
-    return data.map((item, index) => ({
-      value: item.total || 0, // Nilai default 0 jika jumlah null
-      label: item.kode_wilayah || "Unknown", // Label default jika kondisi null
-      golongan_darah: item.golongan_darah || "Tidak Mengisi",
-      frontColor:
-        item.kode_wilayah && item.golongan_darah === "A"
-          ? "#ea5545"
-          : item.kode_wilayah && item.golongan_darah === "B"
-          ? "#87bc45"
-          : item.kode_wilayah && item.golongan_darah === "O"
-          ? "#27aeef"
-          : item.kode_wilayah && item.golongan_darah === "AB"
-          ? "#b33dc6"
-          : "#8E44AD",
+
+    const groupedData = data.reduce((acc, item) => {
+      const key = item.golongan_darah || "Tidak Diketahui";
+      acc[key] = (acc[key] || 0) + (item.total || 0);
+      return acc;
+    }, {});
+
+    return Object.keys(groupedData).map((key, index) => ({
+      value: groupedData[key],
+      label: key,
+      frontColor: "#27aeef",
       onPress: () => {
+        // Bersihkan timeout sebelumnya jika ada
+        if (timeoutRef.current) {
+          clearTimeout(timeoutRef.current);
+        }
         setSelectedBar({
           index,
-          total: item.total || 0,
-          label: item.kode_wilayah || "Unknown",
-          golongan_darah: item.golongan_darah || "Tidak Mengisi",
+          total: groupedData[key],
+          golongan_darah: key,
         });
+        timeoutRef.current = setTimeout(() => {
+          setSelectedBar(null);
+        }, 3000);
       },
     }));
-  };
-
-  const calculateHeaderRows = (data, itemsPerRow = 3) => {
-    const uniqueItems = Array.from(new Set(data.map((item) => item.golongan_darah)));
-    return uniqueItems.reduce((acc, item, index) => {
-      if (index % itemsPerRow === 0) {
-        acc.push([item]);
-      } else {
-        acc[acc.length - 1].push(item);
-      }
-      return acc;
-    }, []);
   };
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const grafikDataResponse = await adapter.getSebaranGrafikGolonganDarah();
-        setGrafikData(validateData(grafikDataResponse));
-        const formattedTableData = grafikDataResponse.map((item) => [
-          item.golongan_darah,
-        ]);
-        setTableData(formattedTableData);
+        setGrafikData(processData(grafikDataResponse));
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -75,28 +61,21 @@ export default function SebaranGender({ navigation }) {
       }
     };
     fetchData();
-    if (selectedBar) {
-      console.log("Selected Bar Data:", selectedBar);
-      const timer = setTimeout(() => setSelectedBar(null), 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [selectedBar]);
+  }, []);
 
   const toggleDropdown = () => {
     const toValue = isExpanded ? 0 : 1;
-
     Animated.timing(animation, {
       toValue,
       duration: 700,
       useNativeDriver: false,
     }).start();
-
     setIsExpanded(!isExpanded);
   };
 
   const animatedHeight = animation.interpolate({
     inputRange: [0, 1],
-    outputRange: [0, 460],
+    outputRange: [0, 420],
   });
 
   const maxValue =
@@ -107,7 +86,10 @@ export default function SebaranGender({ navigation }) {
   return (
     <View style={styles.card}>
       <TouchableOpacity
-        style={[styles.headerDropdown, isExpanded && styles.headerDropdownExpanded]}
+        style={[
+          styles.headerDropdown,
+          isExpanded && styles.headerDropdownExpanded,
+        ]}
         onPress={toggleDropdown}
       >
         <Text style={styles.headerText}>SEBARAN GOLONGAN DARAH</Text>
@@ -121,51 +103,20 @@ export default function SebaranGender({ navigation }) {
         />
       </TouchableOpacity>
 
-      <Animated.View style={[styles.contentContainer, { height: animatedHeight }]}>
+      <Animated.View
+        style={[styles.contentContainer, { height: animatedHeight }]}
+      >
         <View style={styles.infoContainer}>
           <View style={styles.separator} />
 
           {loading ? (
             <Text style={styles.loadingText}>Loading data...</Text>
           ) : (
-            <View>
-              {calculateHeaderRows(grafikData).map((row, rowIndex) => (
-                <Row
-                  key={rowIndex}
-                  data={row.map((golongan_darah) => (
-                    <View style={styles.headerCell} key={golongan_darah}>
-                      <View
-                        style={[
-                          styles.circle,
-                          {
-                            backgroundColor:
-                              golongan_darah === "A"
-                                ? "#ea5545"
-                                : golongan_darah === "B"
-                                ? "#87bc45"
-                                : golongan_darah === "O"
-                                ? "#27aeef"
-                                : golongan_darah === "AB"
-                                ? "#b33dc6"
-                                : "#8E44AD",
-                          },
-                        ]}
-                      />
-                      <Text style={styles.tableHeaderText}>{golongan_darah}</Text>
-                    </View>
-                  ))}
-                  style={[styles.tableHeader, { marginBottom: 10 }]}
-                />
-              ))}
-            </View>
-          )}
-
-          {grafikData.length > 0 && (
-            <View style={{ position: "relative", marginTop: 30,marginLeft: -6 }}>
+            <View style={{ position: "relative", marginTop: 30 }}>
               <BarChart
                 data={grafikData}
-                barWidth={15}
-                spacing={12}
+                barWidth={25}
+                spacing={60}
                 roundedTop
                 roundedBottom
                 xAxisThickness={0}
@@ -178,8 +129,8 @@ export default function SebaranGender({ navigation }) {
                 <View
                   style={{
                     position: "absolute",
-                    top: -20,
-                    left: 24 + selectedBar.index * (8 + 24),
+                    top: -40,
+                    left: selectedBar.index,
                     backgroundColor: "#fff",
                     padding: 10,
                     borderRadius: 8,
@@ -189,15 +140,14 @@ export default function SebaranGender({ navigation }) {
                   <Text style={{ fontWeight: "bold", color: "#000" }}>
                     {selectedBar.golongan_darah}
                   </Text>
-                  <Text style={{ fontWeight: "bold", color: "#000" }}>
-                    Wilayah: {selectedBar.label}
+                  <Text style={{ color: "gray" }}>
+                    Total: {selectedBar.total}
                   </Text>
-                  <Text style={{ color: "gray" }}>Total: {selectedBar.total}</Text>
                 </View>
               )}
             </View>
           )}
-          <Text style={styles.chartFooter}>Wilayah</Text>
+          <Text style={styles.chartFooter}>Golongan Darah</Text>
         </View>
 
         <ButtonDetail
@@ -246,27 +196,6 @@ const styles = StyleSheet.create({
   },
   infoContainer: {
     marginBottom: 10,
-  },
-  tableHeader: {
-    flexDirection: "row",
-    justifyContent: "space-evenly",
-    flexWrap: "wrap",
-    marginBottom: 5,
-  },
-  headerCell: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginHorizontal: 5,
-  },
-  circle: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    marginRight: 10,
-  },
-  tableHeaderText: {
-    textAlign: "center",
-    fontWeight: "bold",
   },
   loadingText: {
     textAlign: "center",

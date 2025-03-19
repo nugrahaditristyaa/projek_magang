@@ -4,7 +4,7 @@ export default {
   async getTotalJemaat() {
     try {
       const response = await axios.get(
-        "https://apigkjdayu-1fsn3awq.b4a.run/jemaat/jumlah"
+        "https://apigereja-production.up.railway.app/jemaat/jumlah"
       );
       console.log("[API] getTotalJemaat", response.data["data"]);
       return response.data["data"];
@@ -16,7 +16,7 @@ export default {
   async getTotalPegawai() {
     try {
       const response = await axios.get(
-        "https://apigkjdayu-1fsn3awq.b4a.run/pegawai/jumlah"
+        "https://apigereja-production.up.railway.app/pegawai/jumlah"
       );
       console.log("[API] getTotalPegawai", response.data["data"]);
       return response.data["data"];
@@ -28,7 +28,7 @@ export default {
   async getTotalMajelis() {
     try {
       const response = await axios.get(
-        "https://apigkjdayu-1fsn3awq.b4a.run/majelis/jumlah"
+        "https://apigereja-production.up.railway.app/majelis/jumlah"
       );
       console.log("[API] getTotalMajelis", response.data["data"]);
       return response.data["data"];
@@ -40,7 +40,7 @@ export default {
   async getSebaranJemaat() {
     try {
       const response = await axios.get(
-        "https://apigkjdayu-1fsn3awq.b4a.run/jemaat/sebaranWilayah"
+        "https://apigereja-production.up.railway.app/jemaat/sebaranWilayah"
       );
       console.log("[API] getSebaranJemaat", response.data["data"]);
       return response.data["data"];
@@ -52,7 +52,7 @@ export default {
   async postPegawai(data) {
     try {
       const response = await axios.post(
-        "https://apigkjdayu-1fsn3awq.b4a.run/pegawai_dayu/tambahDataPegawai",
+        "https://apigereja-production.up.railway.app/pegawai_dayu/tambahDataPegawai",
         data,
         {
           headers: {
@@ -93,7 +93,7 @@ export default {
   async getSebaranPelayanan() {
     try {
       const response = await axios.get(
-        "https://apigkjdayu-1fsn3awq.b4a.run/jemaat/sebaranPelayanan"
+        "https://apigereja-production.up.railway.app/jemaat/sebaranPelayanan"
       );
       console.log("[API] getSebaranPelayanan", response.data["data"]);
       return response.data["data"];
@@ -104,7 +104,7 @@ export default {
   async getSebaranGrafikDisabilitas() {
     try {
       const response = await axios.get(
-        "https://apigkjdayu-1fsn3awq.b4a.run/jemaat/sebaranGrafikDisabilitas"
+        "https://apigereja-production.up.railway.app/jemaat/sebaranGrafikDisabilitas"
       );
       console.log("[API] getSebaranGrafikDisabilitas", response.data["data"]);
       return response.data["data"];
@@ -115,7 +115,7 @@ export default {
   async getSebaranGrafikGender() {
     try {
       const response = await axios.get(
-        "https://apigkjdayu-1fsn3awq.b4a.run/jemaat/sebaranGrafikGender"
+        "https://apigereja-production.up.railway.app/jemaat/sebaranGrafikGender"
       );
       console.log("[API] getSebaranGrafikGender", response.data["data"]);
       return response.data["data"];
@@ -126,7 +126,7 @@ export default {
   async getSebaranGrafikPelayanan() {
     try {
       const response = await axios.get(
-        "https://apigkjdayu-1fsn3awq.b4a.run/jemaat/sebaranGrafikPelayanan"
+        "https://apigereja-production.up.railway.app/jemaat/sebaranGrafikPelayanan"
       );
       
       console.log("[API] getSebaranGrafikPelayanan", response.data["data"]);
@@ -138,7 +138,7 @@ export default {
   async getSebaranGrafikPekerjaan() {
     try {
       const response = await axios.get(
-        "https://apigkjdayu-1fsn3awq.b4a.run/jemaat/sebaranGrafikPekerjaan"
+        "https://apigereja-production.up.railway.app/jemaat/sebaranGrafikPekerjaan"
       );
       
       console.log("[API] getSebaranGrafikPekerjaan", response.data["data"]);
@@ -150,7 +150,7 @@ export default {
   async getSebaranGrafikGolonganDarah() {
     try {
       const response = await axios.get(
-        "https://apigkjdayu-1fsn3awq.b4a.run/jemaat/sebaranGrafikGolonganDarah"
+        "https://apigereja-production.up.railway.app/jemaat/sebaranGrafikGolonganDarah"
       );
       
       console.log("[API] getSebaranGrafikGolonganDarah", response.data["data"]);
@@ -162,7 +162,7 @@ export default {
   async getPelayanan() {
     try {
       const response = await axios.get(
-        "https://apigkjdayu-1fsn3awq.b4a.run/pelayanan"
+        "https://apigereja-production.up.railway.app/pelayanan"
       );
       console.log("[API] getPelayanan", response.data["data"]);
       return response.data["data"];
@@ -173,7 +173,7 @@ export default {
   async getPekerjaan() {
     try {
       const response = await axios.get(
-        "https://apigkjdayu-1fsn3awq.b4a.run/pekerjaan"
+        "https://apigereja-production.up.railway.app/pekerjaan"
       );
       console.log("[API] getPekerjaan", response.data["data"]);
       return response.data["data"];
@@ -184,7 +184,7 @@ export default {
   async getDetailPelayanan() {
     try {
       const response = await axios.get(
-        "https://apigkjdayu-1fsn3awq.b4a.run/jemaat/detailPelayanan"
+        "https://apigereja-production.up.railway.app/jemaat/detailPelayanan"
       );
       const processedData = response.data.data.map((item) => ({
         ...item,
@@ -201,7 +201,7 @@ export default {
   async getDetailPekerjaan() {
     try {
       const response = await axios.get(
-        "https://apigkjdayu-1fsn3awq.b4a.run/jemaat/detailPekerjaan"
+        "https://apigereja-production.up.railway.app/jemaat/detailPekerjaan"
       );
       const processedData = response.data.data.map((item) => ({
         ...item,
@@ -219,7 +219,7 @@ export default {
   async getDetailGolonganDarah() {
     try {
       const response = await axios.get(
-        "https://apigkjdayu-1fsn3awq.b4a.run/jemaat/detailGolonganDarah"
+        "https://apigereja-production.up.railway.app/jemaat/detailGolonganDarah"
       );
       const processedData = response.data.data.map((item) => ({
         ...item,
@@ -236,7 +236,7 @@ export default {
   async getDetailGender() {
     try {
       const response = await axios.get(
-        "https://apigkjdayu-1fsn3awq.b4a.run/jemaat/detailGender"
+        "https://apigereja-production.up.railway.app/jemaat/detailGender"
       );
       const processedData = response.data.data.map((item) => ({
         ...item,
@@ -252,7 +252,7 @@ export default {
   async getDetailDisabilitas() {
     try {
       const response = await axios.get(
-        "https://apigkjdayu-1fsn3awq.b4a.run/jemaat/detailDisabilitas"
+        "https://apigereja-production.up.railway.app/jemaat/detailDisabilitas"
       );
       const processedData = response.data.data.map((item) => ({
         ...item,
@@ -269,7 +269,7 @@ export default {
   async getUlangTahunJemaat() {
     try {
       const response = await axios.get(
-        "https://apigkjdayu-1fsn3awq.b4a.run/jemaat/ulangTahun"
+        "https://apigereja-production.up.railway.app/jemaat/ulangTahun"
       );
       console.log("[API] getUlangTahunJemaat", response.data["data"]);
       return response.data["data"];

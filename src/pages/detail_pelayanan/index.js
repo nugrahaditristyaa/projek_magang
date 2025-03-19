@@ -35,7 +35,7 @@ export default function Detail_pelayanan({ navigation }) {
       setLoading(true);
       try {
         const response = await axios.get(
-          "https://apigkjdayu-1fsn3awq.b4a.run/jemaat/detailPelayanan"
+          "https://apigereja-production.up.railway.app/jemaat/detailPelayanan"
         );
         const rawData = response.data.data;
 
@@ -55,7 +55,7 @@ export default function Detail_pelayanan({ navigation }) {
 
         // Fetch dropdown data
         const dropdownResponse = await axios.get(
-          "https://apigkjdayu-1fsn3awq.b4a.run/pelayanan" // Replace with your API endpoint for categories
+          "https://apigereja-production.up.railway.app/pelayanan" // Replace with your API endpoint for categories
         );
         const dropdownData = dropdownResponse.data.data; // Assume this returns an array of categories
         console.log(dropdownData);
@@ -148,6 +148,7 @@ export default function Detail_pelayanan({ navigation }) {
         zIndexInverse={3000}
       />
 
+      <Text style={styles.totalData}>Total Data: {filteredData.length}</Text>
       {loading ? (
         <Text style={{ textAlign: "center", marginTop: 20 }}>Loading...</Text>
       ) : (
@@ -195,7 +196,7 @@ export default function Detail_pelayanan({ navigation }) {
                 onPress={() => currentPage > 1 && paginate(currentPage - 1)}
                 disabled={currentPage === 1}
               >
-                <Text style={styles.pageButtonText}>Previous</Text>
+                <Text style={styles.pageButtonText}>Prev</Text>
               </TouchableOpacity>
               <Text style={styles.pageInfo}>
                 {currentPage} / {totalPages}
@@ -255,11 +256,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
   },
   tableHeader: {
-    backgroundColor: "#95FBFB",
+    backgroundColor: "#4A90E2",
     borderTopLeftRadius: 8,
     borderTopRightRadius: 8,
   },
   tableHeaderText: {
+    color: "white",
     textAlign: "center",
     fontWeight: "bold",
     padding: 6,
@@ -286,7 +288,7 @@ const styles = StyleSheet.create({
   },
   pageButton: {
     padding: 10,
-    backgroundColor: "#007bff",
+    backgroundColor: "#4A90E2",
     borderRadius: 5,
     marginHorizontal: 10,
   },
@@ -325,5 +327,12 @@ const styles = StyleSheet.create({
   },
   selectedItem: {
     backgroundColor: "#f0f0f0",
+  },
+  totalData: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 10,
+    textAlign: "center",
+    color: "#333",
   },
 });
