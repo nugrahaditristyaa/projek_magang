@@ -24,7 +24,6 @@ import Update_pegawai from "../../pages/update_pegawai";
 import Update_jemaat from "../../pages/update_jemaat";
 import Update_detail from "../../pages/update_detail";
 import Cetak_informasi from "../../pages/cetak_informasi";
-import Dashboard from "../../pages/dashboard";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -64,9 +63,15 @@ export default function Router() {
         <Stack.Screen name="Dashboard" component={Dashboard} />
         <Stack.Screen name="Detail_pelayanan" component={Detail_pelayanan} />
         <Stack.Screen name="Detail_pekerjaan" component={Detail_pekerjaan} />
-        <Stack.Screen name="Detail_golongandarah" component={Detail_golongandarah} />
+        <Stack.Screen
+          name="Detail_golongandarah"
+          component={Detail_golongandarah}
+        />
         <Stack.Screen name="Detail_gender" component={Detail_gender} />
-        <Stack.Screen name="Detail_disabilitas" component={Detail_disabilitas} />
+        <Stack.Screen
+          name="Detail_disabilitas"
+          component={Detail_disabilitas}
+        />
         <Stack.Screen name="Form_warga" component={Form_warga} />
         <Stack.Screen name="Form_detail" component={Form_detail} />
         <Stack.Screen name="Form_pegawai" component={Form_pegawai} />

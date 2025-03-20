@@ -51,13 +51,7 @@ export default {
 
   async getTotalJemaat() {
     try {
-<<<<<<< Updated upstream
-      const response = await axios.get(
-        "https://apigereja-production.up.railway.app/jemaat/jumlah"
-      );
-=======
       const response = await axios.get(`${API_BASE_URL}/jemaat/jumlah`);
->>>>>>> Stashed changes
       console.log("[API] getTotalJemaat", response.data["data"]);
       return response.data["data"];
     } catch (error) {
@@ -310,13 +304,7 @@ export default {
 
   async getTotalPegawai() {
     try {
-<<<<<<< Updated upstream
-      const response = await axios.get(
-        "https://apigereja-production.up.railway.app/pegawai/jumlah"
-      );
-=======
       const response = await axios.get(`${API_BASE_URL}/pegawai/jumlah`);
->>>>>>> Stashed changes
       console.log("[API] getTotalPegawai", response.data["data"]);
       return response.data["data"];
     } catch (error) {
@@ -326,13 +314,7 @@ export default {
 
   async getTotalMajelis() {
     try {
-<<<<<<< Updated upstream
-      const response = await axios.get(
-        "https://apigereja-production.up.railway.app/majelis/jumlah"
-      );
-=======
       const response = await axios.get(`${API_BASE_URL}/majelis/jumlah`);
->>>>>>> Stashed changes
       console.log("[API] getTotalMajelis", response.data["data"]);
       return response.data["data"];
     } catch (error) {
@@ -507,13 +489,7 @@ export default {
 
   async getSebaranJemaat() {
     try {
-<<<<<<< Updated upstream
-      const response = await axios.get(
-        "https://apigereja-production.up.railway.app/jemaat/sebaranWilayah"
-      );
-=======
       const response = await axios.get(`${API_BASE_URL}/jemaat/sebaranWilayah`);
->>>>>>> Stashed changes
       console.log("[API] getSebaranJemaat", response.data["data"]);
       return response.data["data"];
     } catch (error) {
@@ -525,11 +501,7 @@ export default {
     try {
       // Kirim request POST ke server
       const response = await axios.post(
-<<<<<<< Updated upstream
-        "https://apigereja-production.up.railway.app/pegawai_dayu/tambahDataPegawai",
-=======
         `${API_BASE_URL}/tambahDataMajelis`, // Endpoint API
->>>>>>> Stashed changes
         data,
         {
           headers: {
