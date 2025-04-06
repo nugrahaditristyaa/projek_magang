@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { Text, StyleSheet, ScrollView, View, TouchableOpacity } from "react-native";
+import {
+  Text,
+  StyleSheet,
+  ScrollView,
+  View,
+  TouchableOpacity,
+} from "react-native";
 import TabsHeader from "../../component/TabsHeader"; // Adjust the path as necessary
 import SebaranPelayanan from "../../component/SebaranPelayanan";
 import SebaranPekerjaan from "../../component/SebaranPekerjaan";
@@ -34,18 +40,18 @@ export default function Dashboard({ navigation }) {
       </ScrollView>
 
       <View style={styles.bottomNavigation}>
-      <TouchableOpacity onPress={() => navigation.navigate("Home")}>
-        <Icon name="home" size={30} color="#4A90E2" />
-      </TouchableOpacity>
-      <TouchableOpacity onPress={() => navigation.navigate("Dashboard")}>
-        <Icon name="chart-bar" size={30} color="#4A90E2" />
-      </TouchableOpacity>
-      <TouchableOpacity onPress={() => navigation.navigate("Edit")}>
-        <Icon name="note" size={30} color="#4A90E2" />
-      </TouchableOpacity>
-      <TouchableOpacity onPress={() => console.log("User pressed")}>
-        <Icon name="account" size={30} color="#4A90E2" />
-      </TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate("Home")}>
+          <Icon name="home" size={30} color="#4A90E2" />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate("Dashboard")}>
+          <Icon name="chart-bar" size={30} color="#4A90E2" />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate("Edit")}>
+          <Icon name="note" size={30} color="#4A90E2" />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate("Profile")}>
+          <Icon name="account" size={30} color="#4A90E2" />
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -55,7 +61,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f5f5f5",
-    
   },
   header: {
     backgroundColor: "#63ACE1",

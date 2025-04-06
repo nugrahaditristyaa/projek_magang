@@ -87,7 +87,7 @@ export default function TambahDataScreen({ navigation }) {
         <TouchableOpacity onPress={() => navigation.navigate("Home")}>
           <Icon name="home" size={30} color="#4A90E2" />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => console.log("Statistics pressed")}>
+        <TouchableOpacity onPress={() => navigation.navigate("Dashboard")}>
           <Icon name="chart-bar" size={30} color="#4A90E2" />
         </TouchableOpacity>
         <TouchableOpacity onPress={() => console.log("Edit")}>
